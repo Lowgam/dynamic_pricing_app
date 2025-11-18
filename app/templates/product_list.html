@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Products list</title>
+</head>
+<body>
+    <h1>Products list</h1>
+
+    <table border="1" cellpadding="5">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Prezzo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- also a for in the brackets is a placeholder -->
+            {% for product in products %}
+            <tr>
+                <!-- {{ xxx }} are placeholders that will be fulfilled by jinja -->
+                <td>{{ product.id }}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

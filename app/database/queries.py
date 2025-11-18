@@ -1,7 +1,7 @@
 # Module: queries.py
 # Purpose: define fxs that will be used with MySQL
 
-from db import get_connection, get_dict_cursor
+from app.database.db import get_connection, get_dict_cursor
 from mysql.connector import Error
 
 # ---------------------------------------------------
