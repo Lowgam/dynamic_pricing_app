@@ -9,9 +9,9 @@ from mysql.connector import Error
 DB_CONFIG = {
     "host": "localhost",
     "port": 3306,
-    "user": "nico",
-    "password": " xxx ",
-    "database": "dynamic_pricing",
+    "user": "root",
+    "password": "PavardAcerbiDevrijBastoni20",
+    "database": "dynamic_pricing_app",
 }
 
 def get_connection():
@@ -23,3 +23,22 @@ def get_connection():
     except Error as e:
         print(f"Connection with DB failed:  {e}")
         raise
+
+# Cursor generators. They will be used in queries.py to return tuples or dictionaries.
+# They have conn as parameter because they need to know from which connection is the command arriving. A cursor needs to be linked with the connection
+def get_cursor(conn):
+    return conn.cursor()
+
+def get_dict_cursor(conn):
+    return conn.cursor(dictionary=True)
+
+# Py assign every file if directly executed or imported (undirectly executed) a __name__
+# Here down means: if I directly launched db.py as main (py assign automatically __main__ as __name__ if the file is directly launched), then do this test.
+# NB!!!! Py can be launched from every file, a main as Java is not needed.
+if __name__ == "__main__":
+    conn = get_connection()
+    if conn is not None and conn.is_connected():
+        print("Connected to MySQL database")
+        conn.close()
+    else:
+        print("Failed to connect to MySQL database")
