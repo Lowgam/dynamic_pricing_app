@@ -121,7 +121,7 @@ def update_product(product_id: id, new_price: float):
 # ---------------------------------------------------
 # Test for successful queries
 # ---------------------------------------------------
-"""if __name__ == "__main__":
+if __name__ == "__main__":
     products = get_all_products()
     print("PRODUCTS FOUND:")
     for p in products:
@@ -131,8 +131,8 @@ def update_product(product_id: id, new_price: float):
     print("RULES FOUND:")
     for r in rules:
         print(r)
-"""
 
-if __name__ == "__main__":
-    update_product(1, 1.59)
-    print("Test Update completed")
+
+#if __name__ == "__main__":
+#    update_product(1, 1.59)
+#    print("Test Update completed")
