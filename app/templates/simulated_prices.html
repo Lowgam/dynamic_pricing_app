@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulated Prices</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 20px;
+        }
+        h1 {
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f3f3f3;
+        }
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        .price-old {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        .price-down {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simulated Prices</h1>
+    <p>Confronto tra prezzo attuale e prezzo simulato (solo sconti, mai sotto il cost price).</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Product</th>
+                <th>Cost price</th>
+                <th>Old price</th>
+                <th>New price</th>
+                <th>Diff (€)</th>
+                <th>Expiry date</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for p in products %}
+            {% set diff = (p.new_price - p.old_price) %}
+            <tr>
+                <td>{{ p.id }}</td>
+                <td>{{ p.name }}</td>
+                <td>{{ "%.2f"|format(p.cost_price) }}</td>
+                <td class="price-old">{{ "%.2f"|format(p.old_price) }}</td>
+                <td class="price-down">{{ "%.2f"|format(p.new_price) }}</td>
+                <td>{{ "%.2f"|format(diff) }}</td>
+                <td>{{ p.expiry_date }}</td>
+                <td>{{ p.stock }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

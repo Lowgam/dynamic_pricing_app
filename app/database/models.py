@@ -11,15 +11,17 @@ from typing import Optional
 
 #Product is a pydantic model, with his own "powers" FastAPI without pydantic doesn't exist.
 class Product(BaseModel):
-    id: int
-    title: str
-    current_price: float
     # Optional can be a str or none(empty). It is needed because real datas are not always complete. Something can be missing
     # We use str instead of datetime because we get those datas from Shopify that uses str for days. Datetime is more rigid. I might change it later
-    expiration_date: Optional[str]
-    category: Optional[str]
-    stock: Optional[int]
-
+    id: int
+    shopify_id: Optional[int] = None
+    sku: Optional[str] = None
+    name: Optional[str] = None
+    price: Optional[float] = None
+    cost_price: float
+    stock: Optional[int] = None
+    category: Optional[str] = None
+    expiry_date: Optional[str] = None
 # -------------------------------------------------
 # Pricing rule model
 # -------------------------------------------------

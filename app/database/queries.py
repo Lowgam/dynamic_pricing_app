@@ -116,10 +116,14 @@ def update_product(product_id: id, new_price: float):
         if conn:
                 conn.close()
 
+
+
+# ---------------------------------------------------
+# ------------------- TESTING -----------------------
 # ---------------------------------------------------
 
 # ---------------------------------------------------
-# Test for successful queries
+# Test for successful SELECT
 # ---------------------------------------------------
 if __name__ == "__main__":
     products = get_all_products()
@@ -132,7 +136,9 @@ if __name__ == "__main__":
     for r in rules:
         print(r)
 
-
+# ---------------------------------------------------
+# Test for successful UPDATE
+# ---------------------------------------------------
 #if __name__ == "__main__":
 #    update_product(1, 1.59)
 #    print("Test Update completed")

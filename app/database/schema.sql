@@ -3,13 +3,16 @@
 -- =========================
 -- Tab: products
 -- =========================
-CREATE TABLE IF NOT EXISTS products (
-    id INT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    current_price DECIMAL(10,2) NOT NULL,
-    expiration_date DATE NULL,
-    category VARCHAR(100),
-    stock INT
+CREATE TABLE if NOT EXISTS products (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    shopify_id BIGINT NULL,
+    sku VARCHAR(100) NULL,
+    name VARCHAR(255) NULL,
+    price DECIMAL(10,2) NULL,
+    cost_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    stock INT NULL,
+    category VARCHAR(100) NULL,
+    expiry_date DATE NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

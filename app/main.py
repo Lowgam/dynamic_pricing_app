@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import products
+from app.routes import products, pricing
 
 # creation app, FastAPI() = constructor. Everything I am going to add is going to be attached to this object
 # In py I can create variables without specifying the nature. In this case we take an object from FastAPI library
@@ -16,3 +16,5 @@ def home():
     return {"message": "Dynamic Pricing App - Server is active!!!"}
 
 app.include_router(products.router)
+
+app.include_router(pricing.router)
