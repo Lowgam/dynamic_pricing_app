@@ -7,7 +7,6 @@ from app.database.queries import get_all_products
 # jinja2 deals with the creation of the HTML part, because FastAPI can only give JSON responses. Without jinja2 we should
 # write HTML strings with python (not suggested) or use a separated front end, for example React.
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
 
 # Router creation. It is a fastapi class, it is needed to define endpoint and attach this endpoint ot the main,py.
 # the router object itself it is empty, we need its ability to connect the main.py
@@ -16,23 +15,13 @@ router = APIRouter()
 # A template is an HTML file with a placeholder that will be used by jinja2 by knowing where to fullfill lacks
 # In this way we are able to separate py logic to HTML/CSS
 templates = Jinja2Templates(directory="app/templates")
-@router.get("/products-ui", response_class=HTMLResponse)
-# Jinja2 always request a Request for a TemplateResponse.
-# It is the object that represents HTMP request and allows TemplateResponse to work well.
-def products_page(request: Request):
-    products = get_all_products()
-    return templates.TemplateResponse(
-        "product_list.html",
-        {
-            "request": request,
-            "products": products,
-        }
-    )
 
-
+# ---------------------------------------------------
+# Fx: Get all products to endpoint : JSON
+# ---------------------------------------------------
 # Endpoint definition. When this endpoint is called, the following function is executed.
 @router.get("/products")
-def list_products():
+async def list_products():
     products = get_all_products()
     # We can ask to return a dict. FastAPI is able (as said before) to translate the datas in a flexible way.
     # In this case we say: we need the datas formatted as this dict.

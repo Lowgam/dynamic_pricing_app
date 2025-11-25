@@ -7,6 +7,10 @@ from typing import Optional, Union
 # This function is used to calculate how many days are left to the expiration of a product
 # It is the base of the next function.
 # In order to calculate the number, it takes a string as expiry date (from shopify)
+
+# ---------------------------------------------------
+# Fx: Convert and calculate days to expiry
+# ---------------------------------------------------
 def days_to_expiry_converter(expiry_value : Optional[Union[str, date]]) -> Optional[int]:
     if not expiry_value:
         return None
@@ -20,6 +24,9 @@ def days_to_expiry_converter(expiry_value : Optional[Union[str, date]]) -> Optio
     delta = (expiry_date - today).days
     return delta
 
+# ---------------------------------------------------
+# Fx: Calculate new price: THE ENGINE
+# ---------------------------------------------------
 def calculate_new_price(
         base_price: float,
         cost_price: float,

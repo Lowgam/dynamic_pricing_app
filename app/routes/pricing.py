@@ -3,62 +3,28 @@
 
 from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
 
-from app.database.queries import get_all_products
-from app.services.pricing_engine import calculate_new_price
+from app.services.pricing_db_pipeline import simulate_prices_from_db
+from app.services.pricing_pipeline import simulate_new_prices_from_mock
 
 # Create new route
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-@router.get("/simulate-prices-ui", response_class=HTMLResponse)
-def simulate_pricing_ui(request: Request):
-    simulated_data = simulate_prices()
-    products = simulated_data["products"]
-
-    return templates.TemplateResponse(
-        "simulated_prices.html",
-        {
-            "request": request,
-            "products": products,
-        }
-    )
-
+# ---------------------------------------------------------------------
+# Fx: Get all products from DB and calculate new prices.
+# ---------------------------------------------------------------------
 @router.get("/simulate-prices")
-def simulate_prices():
-    products = get_all_products()
+async def simulate_prices(request: Request):
+    return simulate_prices_from_db()
 
-    if products is None:
-        return {"Error": "No products found"}
-    simulated_prices = []
+# ---------------------------------------------------------------------
+# Fx: Simulate pricing mock
+# ---------------------------------------------------------------------
+@router.get("/simulate-prices-mock")
+# async is here used because FastAPI is able to work asynchronically. That means we can  execute many request at the same time
+# using a normal def means that the program need the server won't be blocked by multiple requests. It is  more flexible with I/O
+async def simulate_pricing_mock():
+    result = simulate_new_prices_from_mock()
+    return result
 
-    for p in products:
-        base_price = p["price"]
-        cost_price = p["cost_price"]
-        stock = p["stock"]
-        expiry_date = p["expiry_date"]
-
-        # Not calculated yet
-        sales_velocity = None
-
-        new_price = calculate_new_price(
-            base_price=base_price,
-            cost_price=cost_price,
-            stock=stock,
-            sales_velocity=sales_velocity,
-            expiry_date_str=expiry_date
-        )
-
-        # Must be implemented with the missing values (like shopify_id, sku etc)
-        simulated_prices.append({
-            "id": p["id"],
-            "name": p["name"],
-            "cost_price": float (cost_price),
-            "old_price": float (base_price),
-            "new_price": float (new_price),
-            "stock": int (stock) if stock is not None else None,
-            "expiry_date": expiry_date,
-        })
-
-    return {"products": simulated_prices}

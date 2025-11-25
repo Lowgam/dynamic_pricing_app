@@ -6,6 +6,14 @@
 from app.services.shopify_connector import fetch_products_from_shopify_mock
 from app.database.queries import import_mock_products
 
+
+# ---------------------------------------------------
+# ------------------- TESTING -----------------------
+# ---------------------------------------------------
+
+# ---------------------------------------------------
+# Test for import products from mock to DB
+# ---------------------------------------------------
 if __name__ == "__main__":
     products = fetch_products_from_shopify_mock()
     import_mock_products(products)

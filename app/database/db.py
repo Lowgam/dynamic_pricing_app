@@ -13,7 +13,9 @@ DB_CONFIG = {
     "password": "PavardAcerbiDevrijBastoni20",
     "database": "dynamic_pricing_app",
 }
-
+# ---------------------------------------------------
+# Fx: Open a connection with DB
+# ---------------------------------------------------
 def get_connection():
     try:
         #conn here is a mysql.connector.MySQLConnection object used to manage the connection. It opens the DB door. You get a message only in case of failed connection.
@@ -26,11 +28,23 @@ def get_connection():
 
 # Cursor generators. They will be used in queries.py to return tuples or dictionaries.
 # They have conn as parameter because they need to know from which connection is the command arriving. A cursor needs to be linked with the connection
+
+# ---------------------------------------------------
+# Fx: Get cursor from a connection with DB
+# ---------------------------------------------------
 def get_cursor(conn):
     return conn.cursor()
 
+# ---------------------------------------------------
+# Fx: Get a specific cursor for DICT
+# ---------------------------------------------------
 def get_dict_cursor(conn):
     return conn.cursor(dictionary=True)
+
+
+# ---------------------------------------------------
+# ------------------- TESTING -----------------------
+# ---------------------------------------------------
 
 # Py assign every file if directly executed or imported (undirectly executed) a __name__
 # Here down means: if I directly launched db.py as main (py assign automatically __main__ as __name__ if the file is directly launched), then do this test.
