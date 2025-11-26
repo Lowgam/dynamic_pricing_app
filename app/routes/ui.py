@@ -41,6 +41,8 @@ async def simulate_pricing_ui(request: Request):
         {
             "request": request,
             "products": products,
+            "count": len(products),
+            "source": "DB"
         }
     )
 
@@ -56,5 +58,7 @@ async def simulate_pricing_mock_ui(request: Request):
         {
             "request": request,
             "products": result,
+            "count": len(result),
+            "source": "Shopify Mock"
         }
     )
