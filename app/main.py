@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import products, pricing, ui
+from app.routes import products, pricing, ui, dashboard
 
 # creation app, FastAPI() = constructor. Everything I am going to add is going to be attached to this object
 # In py I can create variables without specifying the nature. In this case we take an object from FastAPI library
@@ -29,3 +29,8 @@ app.include_router(pricing.router)
 # Endpoint for UI
 # -------------------------------------------------------
 app.include_router(ui.router)
+
+# -------------------------------------------------------
+# Endpoint for /dashboard
+# -------------------------------------------------------
+app.include_router(dashboard.router)

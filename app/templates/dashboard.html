@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 30px;
+        }
+        .table-box, .chart-box {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            width: 50%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            border-bottom: 1px solid #ddd;
+            padding: 8px;
+        }
+    </style>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+
+<h2>📊 Dashboard prodotti</h2>
+
+<div class="container">
+
+    <!-- BOX SINISTRO → Tabella prodotti (mock per ora) -->
+    <div class="table-box">
+        <h3>Lista prodotti</h3>
+
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Prezzo</th>
+            </tr>
+
+            <!-- Dati mock temporanei -->
+            <tr>
+                <td>1</td>
+                <td>Prodotto A</td>
+                <td>3.99 €</td>
+            </tr>
+
+            <tr>
+                <td>2</td>
+                <td>Prodotto B</td>
+                <td>2.49 €</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- BOX DESTRO → Grafico Chart.js -->
+    <div class="chart-box">
+        <h3>Andamento vendite</h3>
+        <canvas id="salesChart"></canvas>
+    </div>
+
+</div>
+
+<script>
+    async function loadChart() {
+        const response = await fetch("/chart-data?product_id=1");
+        const data = await response.json();
+
+        const ctx = document.getElementById('salesChart');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Vendite (mock)',
+                    data: data.values,
+                    borderWidth: 2
+                }]
+            }
+        });
+    }
+
+    window.addEventListener("load", loadChart);
+</script>
+
+</body>
+</html>

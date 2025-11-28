@@ -3,15 +3,16 @@
 
 from datetime import date
 from typing import Optional, Union
+from app.services.date_utils import days_to_expiry
 
 # This function is used to calculate how many days are left to the expiration of a product
 # It is the base of the next function.
 # In order to calculate the number, it takes a string as expiry date (from shopify)
 
 # ---------------------------------------------------
-# Fx: Convert and calculate days to expiry
+# Fx: Convert and calculate days to expiry (NOT NECESSARY ATM)
 # ---------------------------------------------------
-def days_to_expiry_converter(expiry_value : Optional[Union[str, date]]) -> Optional[int]:
+"""def days_to_expiry_converter(expiry_value : Optional[Union[str, date]]) -> Optional[int]:
     if not expiry_value:
         return None
 # Then converts it to a date format with datetime library.
@@ -23,6 +24,7 @@ def days_to_expiry_converter(expiry_value : Optional[Union[str, date]]) -> Optio
 # Here it calculate the difference between the expiry date and today. It is a timedelta object, adding .days we just get a number, an int.
     delta = (expiry_date - today).days
     return delta
+"""
 
 # ---------------------------------------------------
 # Fx: Calculate new price: THE ENGINE
@@ -39,8 +41,9 @@ def calculate_new_price(
     base_price = float(base_price) if base_price is not None else 0.0
     cost_price = float(cost_price) if cost_price is not None else 0.0
 
-    # 1) Calculate days before expiration date
-    days_to_expiry = days_to_expiry_converter(expiry_date_str)
+    # 1) Calculate days before expiration date 1.1) Now calling date_utils
+    # days_to_expiry = days_to_expiry_converter(expiry_date_str) NOT NECESSARY ATM
+    days_exp = days_to_expiry(expiry_date_str)
 
     # 2) Discount based on days to expiry
     discount = 0.0
@@ -49,13 +52,13 @@ def calculate_new_price(
         discount = 0.0
 
     else:
-        if days_to_expiry <= 0:
+        if days_exp <= 0:
             discount = 0.5
-        elif days_to_expiry <= 3:
+        elif days_exp <= 3:
             discount = 0.4
-        elif days_to_expiry <= 7:
+        elif days_exp <= 7:
             discount = 0.3
-        elif days_to_expiry <= 14:
+        elif days_exp <= 14:
             discount = 0.2
         else:
             discount = 0.1
