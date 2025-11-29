@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import List, Dict, Optional
 
-from app.services.pricing_engine import calculate_new_price
+from app.services.pricing_engine import calculate_engined_price
 from app.services.shopify_connector import fetch_products_from_shopify_mock, ShopifyProduct
 
 # ---------------------------------------------------
@@ -17,7 +17,7 @@ def simulate_new_prices_from_mock() -> List[Dict]:
     simulated_prices_from_mock = []
 
     for p in product_from_mock:
-        final_price = calculate_new_price(
+        final_price = calculate_engined_price(
             base_price=p["base_price"],
             cost_price=p["cost_price"],
             stock=p["stock"],

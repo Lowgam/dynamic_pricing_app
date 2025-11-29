@@ -1,7 +1,6 @@
 # Module : pricing_engine.py
 # Purpose : Create the heart of the modifying logic for the prices
 
-from datetime import date
 from typing import Optional, Union
 from app.services.date_utils import days_to_expiry
 
@@ -29,7 +28,7 @@ from app.services.date_utils import days_to_expiry
 # ---------------------------------------------------
 # Fx: Calculate new price: THE ENGINE
 # ---------------------------------------------------
-def calculate_new_price(
+def calculate_engined_price(
         base_price: float,
         cost_price: float,
         stock: Optional[int],
@@ -82,12 +81,16 @@ def calculate_new_price(
     simulated_price = base_price * (1 - discount)
 
     # 7) Treshplds for final price. Here the max value between simulated_price and cost_price is chosen.
-    final_price = max(simulated_price, cost_price)
+    engined_price = max(simulated_price, cost_price)
 
     # 8) Rounding to two decimals
-    final_price = round(final_price, 2)
+    engined_price = round(engined_price, 2)
 
-    return final_price
+    return engined_price
+
+def apply_engined_price(engined_price: float, coeff: float) -> float:
+    final_price = engined_price * coeff
+    return round(final_price, 2)
 
 # ---------------------------------------------------
 # ------------------- TESTING -----------------------
@@ -100,6 +103,6 @@ if __name__ == "__main__":
     sales_vel = 0.3
     expiry = "2025-11-30"
 
-    new_price = calculate_new_price(price, cost, stock, sales_vel, expiry)
+    new_price = calculate_engined_price(price, cost, stock, sales_vel, expiry)
     print(f"Prezzo originale: {price} €  ->  Prezzo simulato: {new_price} €")
 

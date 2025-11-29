@@ -2,7 +2,7 @@
 # Purpose : calculate simulation of new prices taking datas from DB
 
 from app.database.queries import get_all_products
-from app.services.pricing_engine import calculate_new_price
+from app.services.pricing_engine import calculate_engined_price
 
 # ---------------------------------------------------------------------
 # Fx: Calculate a pricing simulation from DB
@@ -23,7 +23,7 @@ def simulate_prices_from_db():
         # Not calculated yet
         sales_velocity = None
 
-        new_price = calculate_new_price(
+        new_price = calculate_engined_price(
             base_price=base_price,
             cost_price=cost_price,
             stock=stock,
