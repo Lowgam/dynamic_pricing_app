@@ -8,24 +8,81 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #83b48c;
         }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
         .container {
             display: flex;
             gap: 30px;
+            align-items: flex-start;
         }
-        .table-box, .chart-box {
+
+        .table-box,
+        .chart-box {
             border: 1px solid #ccc;
             padding: 15px;
             border-radius: 8px;
             width: 50%;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
+
+        /* Scrollable list */
+        .table-box {
+            max-height: 400px;        
+            overflow-y: auto;          
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        table th, table td {
+
+        table th,
+        table td {
             border-bottom: 1px solid #ddd;
             padding: 8px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f0f0f0;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        /* Righe prodotti cliccabili */
+        .product-row {
+            cursor: pointer;
+        }
+
+        .product-row:hover {
+            background-color: #f9f9f9;
+        }
+
+        .product-row.selected {
+            background-color: #e6f3ff;
+        }
+
+        /* Colonna checkbox */
+        .col-select {
+            width: 40px;
+            text-align: center;
+        }
+
+        .controls-box {
+            margin-bottom: 10px;
+        }
+
+        .controls-box p {
+            margin: 0 0 5px 0;
+            font-size: 0.9rem;
+            color: #666;
         }
     </style>
 
@@ -35,65 +92,183 @@
 </head>
 <body>
 
-<h2>📊 Dashboard prodotti</h2>
+<h2>Products dashboard</h2>
 
 <div class="container">
 
-    <!-- BOX SINISTRO → Tabella prodotti (mock per ora) -->
+    <!-- LEFT BOX: products Tab (mock atm) -->
     <div class="table-box">
-        <h3>Lista prodotti</h3>
+        <h3>Products List</h3>
 
         <table>
+            <thead>
             <tr>
+                <th class="col-select">
+                    <input type="checkbox" id="selectAll">
+                </th>
                 <th>ID</th>
-                <th>Nome</th>
-                <th>Prezzo</th>
+                <th>Name</th>
+                <th>Price</th>
             </tr>
-
-            <!-- Dati mock temporanei -->
-            <tr>
+            </thead>
+            <tbody>
+            <!-- Temporary mock datas -->
+            <tr class="product-row" data-product-id="1">
+                <td class="col-select">
+                    <input type="checkbox" class="row-select">
+                </td>
                 <td>1</td>
                 <td>Prodotto A</td>
                 <td>3.99 €</td>
             </tr>
 
-            <tr>
+            <tr class="product-row" data-product-id="2">
+                <td class="col-select">
+                    <input type="checkbox" class="row-select">
+                </td>
                 <td>2</td>
                 <td>Prodotto B</td>
                 <td>2.49 €</td>
             </tr>
+            </tbody>
         </table>
     </div>
 
-    <!-- BOX DESTRO → Grafico Chart.js -->
+    <!-- RIGHT BOX: Chart with Chart.js -->
     <div class="chart-box">
-        <h3>Andamento vendite</h3>
+        <h3>Sales panoramic</h3>
+
+        <div class="controls-box">
+            <p>Click on a product on the left to see the last 14 days sales.</p>
+        </div>
+
+        <!-- canvas:  -->
         <canvas id="salesChart"></canvas>
     </div>
 
 </div>
 
 <script>
-    async function loadChart() {
-        const response = await fetch("/chart-data?product_id=1");
+    // Global variable for the script. Chart.js is here saved.
+    let salesChart = null;
+
+    // ---------------------------------------------------------
+    // Fx : ask data from backend and chart update
+    // ---------------------------------------------------------
+    async function updateChart(productId) {
+        // 1) Call to FastAPI endpoint /chart-data
+        const response = await fetch(`/chart-data?product_id=${productId}`);
+        // 2) Convert JSON answer from /chart-data to JS object. Takes the data needed for chart
         const data = await response.json();
 
+        // 3) get element by ID (canvas here)
         const ctx = document.getElementById('salesChart');
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.labels,
-                datasets: [{
-                    label: 'Vendite (mock)',
-                    data: data.values,
-                    borderWidth: 2
-                }]
-            }
+        // 4) Creating the Chart (if not exists)
+        // Chart.js is a JS library. Two fundamental things:
+        // - type (line, bar, pie..)
+        // - data (what to draw)
+        if (salesChart === null) {
+            // Chart line type
+            salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    // x axe
+                    labels: data.labels,
+                    datasets: [{
+                        // Text for charts
+                        label: `Sales (mock) - Product ${productId}`,
+                        // y axe
+                        data: data.values,
+                        // Thickness line
+                        borderWidth: 2
+                    }]
+                }
+            });
+        // 5) or updating the chart
+        } else {
+            // Aggiorniamo il grafico esistente
+            salesChart.data.labels = data.labels;
+            salesChart.data.datasets[0].data = data.values;
+            salesChart.data.datasets[0].label = `Sales (mock) - Product ${productId}`;
+            salesChart.update();
+        }
+    }
+
+    // ---------------------------------------------------------
+    // Fx : highlighs selected row
+    // ---------------------------------------------------------
+    function highlightSelectedRow(selectedRow) {
+        const rows = document.querySelectorAll('.product-row');
+        rows.forEach(row => row.classList.remove('selected'));
+        selectedRow.classList.add('selected');
+    }
+
+    // ---------------------------------------------------------
+    // Fx : connect click on rows with the chart
+    // ---------------------------------------------------------
+    function setupRowClickHandlers() {
+        // select all lines. The point (.) is used to search for class. In this case all elements that have class: product-row
+        const rows = document.querySelectorAll('.product-row');
+
+        rows.forEach(row => {
+            // for every row add a listener for "click" events
+            row.addEventListener('click', (event) => {
+                // Checkbox doen't mean change graphic.
+                if (event.target.tagName.toLowerCase() === 'input') {
+                    return;
+                }
+
+                const productId = row.dataset.productId;
+                // Calling function for highliting
+                highlightSelectedRow(row);
+                // Calling function for update
+                updateChart(productId);
+            });
+        });
+
+        // If condition to have always a row selected (not super necessary)
+        if (rows.length > 0) {
+            const firstRow = rows[0];
+            highlightSelectedRow(firstRow);
+            const initialProductId = firstRow.dataset.productId;
+            updateChart(initialProductId);
+        }
+    }
+
+    // ---------------------------------------------------------
+    // Fx : managing select all from checkbox
+    // ---------------------------------------------------------
+    function setupSelectAll() {
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const rowCheckboxes = document.querySelectorAll('.row-select');
+
+        if (!selectAllCheckbox) return;
+
+        selectAllCheckbox.addEventListener('change', () => {
+            rowCheckboxes.forEach(cb => {
+                cb.checked = selectAllCheckbox.checked;
+            });
         });
     }
 
-    window.addEventListener("load", loadChart);
+    // ---------------------------------------------------------
+    // Fx : main fx to prepare the dashboard
+    // ---------------------------------------------------------
+    function setupDashboard() {
+        setupRowClickHandlers();
+        setupSelectAll();
+    }
+
+    // ---------------------------------------------------------
+    // ENTERING POINT: WHEN THE PAGE IS LOADED
+    // ---------------------------------------------------------
+    // addEventListener is a method for objects
+    window.addEventListener("load", setupDashboard);
+    // - execute setupDashboard
+    // - activate clicks on the rows
+    // - select first product and show the chart
+    // - activate select all
 </script>
 
 </body>

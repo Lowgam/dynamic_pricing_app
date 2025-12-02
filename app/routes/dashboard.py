@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
 
 from app.services.chart_data_builder import build_chart_data
+
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 

@@ -7,7 +7,7 @@ from typing import Dict, List
 # ---------------------------------------------------
 # Fx: Generate sales series for testing purposes
 # ---------------------------------------------------
-def generate_mock_sales_series(days: int = 14) -> Dict[str, List]:
+def generate_mock_sales_series(days: int = 14, product_id : int = 1) -> Dict[str, List]:
     """
     parameter:
     days(int) days to be shown
@@ -25,7 +25,7 @@ def generate_mock_sales_series(days: int = 14) -> Dict[str, List]:
         day = date.today() - timedelta(days = (days - i))
         labels.append(day.strftime("%d-%m"))
         # Hypothetical sales values, for testings sakes
-        values.append((i * 3) % 15 + 5)
+        values.append(((i + product_id) * 3) % 15 + 5)
 
     return {
         "labels": labels,
@@ -43,7 +43,7 @@ def build_chart_data(product_id: int) -> Dict:
     return:
     dict structure for chart
     """
-    mock_series = generate_mock_sales_series()
+    mock_series = generate_mock_sales_series(product_id = product_id)
 
     return {
         "product_id": product_id,
