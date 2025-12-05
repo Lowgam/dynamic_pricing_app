@@ -132,6 +132,11 @@
             </tr>
             </tbody>
         </table>
+
+        <!-- NEW: Button to trigger AI suggestions for selected products -->
+        <button type="button" id="aiSuggestionBtn">
+            AI Suggestion for selected products
+        </button>
     </div>
 
     <!-- RIGHT BOX: Chart with Chart.js -->
@@ -253,11 +258,56 @@
     }
 
     // ---------------------------------------------------------
+    // Fx : get selected product IDs
+    // ---------------------------------------------------------
+    function getSelectedProductIds() {
+        const selectedIds = [];
+        const checkboxes = document.querySelectorAll('.row-select');
+
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                const row = cb.closest('.product-row');
+                if (row) {
+                    const id = row.dataset.productId;
+                    selectedIds.push(id);
+                }
+            }
+        });
+
+        return selectedIds;
+    }
+
+    // ---------------------------------------------------------
+    // Fx : setup AI Suggestion button
+    // ---------------------------------------------------------
+    function setupAISuggestionButton() {
+        const button = document.getElementById('aiSuggestionBtn');
+        if (!button) return;
+
+        button.addEventListener('click', () => {
+            const ids = getSelectedProductIds();
+
+            if (ids.length === 0) {
+                alert("Please select at least one product.");
+                return;
+            }
+
+            // Join IDs in a comma-separated string
+            const query = encodeURIComponent(ids.join(","));
+
+            // Redirect to the new page /ai-suggestions
+            window.location.href = `/ai-suggestions?ids=${query}`;
+        });
+    }
+
+
+    // ---------------------------------------------------------
     // Fx : main fx to prepare the dashboard
     // ---------------------------------------------------------
     function setupDashboard() {
         setupRowClickHandlers();
         setupSelectAll();
+        setupAISuggestionButton();
     }
 
     // ---------------------------------------------------------

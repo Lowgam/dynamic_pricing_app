@@ -1,8 +1,8 @@
 # Module : pricing_engine.py
 # Purpose : Create the heart of the modifying logic for the prices
 
-from typing import Optional, Union
-from app.services.date_utils import days_to_expiry
+from typing import Optional
+from app.utils.date_utils import days_to_expiry
 
 # This function is used to calculate how many days are left to the expiration of a product
 # It is the base of the next function.
@@ -95,14 +95,4 @@ def apply_engined_price(engined_price: float, coeff: float) -> float:
 # ---------------------------------------------------
 # ------------------- TESTING -----------------------
 # ---------------------------------------------------
-
-if __name__ == "__main__":
-    price = 1.59
-    cost = 0.80
-    stock = 50
-    sales_vel = 0.3
-    expiry = "2025-11-30"
-
-    new_price = calculate_engined_price(price, cost, stock, sales_vel, expiry)
-    print(f"Prezzo originale: {price} €  ->  Prezzo simulato: {new_price} €")
 

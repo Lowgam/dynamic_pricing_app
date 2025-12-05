@@ -49,7 +49,7 @@ def simulate_new_prices_with_ai(products: List[Dict]) -> List[Dict]:
             "sku": p.get("sku"),
             "name": p.get("name") or p.get("title"),
             "category": p.get("category"),
-            "base_price": p.get("base_price"),
+            "base_price": p.get("price"),
             "cost_price": p.get("cost_price"),
             "engined_price": engined_price,
             "ai_coefficient": ai_coeff,

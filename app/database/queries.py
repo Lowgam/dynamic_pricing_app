@@ -3,6 +3,7 @@
 
 from .db import get_connection, get_dict_cursor
 from mysql.connector import Error
+from typing import List
 
 # ---------------------------------------------------
 # Fx: get all products from DB
@@ -116,7 +117,36 @@ def update_product(product_id: id, new_price: float):
         if conn:
                 conn.close()
 
+# ---------------------------------------------------
+# Fx: get products by id
+# ---------------------------------------------------
+def get_products_by_ids(ids: List[int]):
+    if not ids:
+        return []
 
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Heart of this function. The following query needs holes as many are the ids entering as parameters
+        # placeholders basically creates a string with %s (placeholders).
+        # I do not want to insert the ids directly in SQL string. We will attach them later with cursor.execute.
+        # Why? To avoid SQL injections.
+        placeholders = ",".join(["%s"] * len(ids))
+        sql = f"SELECT * FROM products WHERE id IN ({placeholders})"
+
+        cursor.execute(sql, ids)
+        rows = cursor.fetchall()
+        return rows
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 # ---------------------------------------------------
 # ------------------- TESTING -----------------------
@@ -125,7 +155,7 @@ def update_product(product_id: id, new_price: float):
 # ---------------------------------------------------
 # Test for successful SELECT
 # ---------------------------------------------------
-if __name__ == "__main__":
+# if __name__ == "__main__":
     products = get_all_products()
     print("PRODUCTS FOUND:")
     for p in products:
@@ -142,3 +172,12 @@ if __name__ == "__main__":
 #if __name__ == "__main__":
 #    update_product(1, 1.59)
 #    print("Test Update completed")
+
+# ---------------------------------------------------
+# Test for successful get_all_products
+# ---------------------------------------------------
+# if __name__ == "__main__":
+    from pprint import pprint
+    rows = get_all_products()
+    print("TEST get_all_products():")
+    pprint(rows)

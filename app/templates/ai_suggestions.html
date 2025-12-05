@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Suggestions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+        }
+
+        th, td {
+            border-bottom: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+
+        .back-link {
+            margin-top: 15px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<h2>AI Suggestions – Selected products</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Product</th>
+            <th>Current price</th>
+            <th>Engine price (math)</th>
+            <th>AI coeff</th>
+            <th>AI suggested price</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in products %}
+    <tr>
+        <!-- Product ID -->
+        <td>{{ p.id }}</td>
+
+        <!-- Product Name -->
+        <td>{{ p.name }}</td>
+
+        <!-- Current price -->
+        <td>
+            {% if p.base_price is not none %}
+                {{ p.base_price }}
+            {% else %}
+                -
+            {% endif %}
+        </td>
+
+        <!-- Engine price -->
+        <td>
+            {% if p.engined_price is not none %}
+                {{ p.engined_price }}
+            {% else %}
+                -
+            {% endif %}
+        </td>
+
+        <!-- AI coeff -->
+        <td>
+            {% if p.ai_coefficient is not none %}
+                {{ p.ai_coefficient }}
+            {% else %}
+                -
+            {% endif %}
+        </td>
+
+        <!-- AI suggested price (final_price) -->
+        <td>
+            {% if p.final_price is not none %}
+                {{ p.final_price }}
+            {% else %}
+                -
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+</table>
+
+<a class="back-link" href="/dashboard">← Back to dashboard</a>
+
+</body>
+</html>

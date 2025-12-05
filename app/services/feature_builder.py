@@ -1,9 +1,8 @@
 # Module : feature_builder.py
 # Purpose : Extract and prepare necessary features for ai_engine
 
-from datetime import date
 from typing import Dict, Any
-from app.services.date_utils import days_to_expiry
+from app.utils.date_utils import days_to_expiry
 
 # ---------------------------------------------------
 # Fx: Build the features for AI
