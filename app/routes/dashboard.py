@@ -9,8 +9,6 @@ from typing import List
 from app.services.chart_data_builder import build_chart_data
 from app.database.queries import get_products_by_ids
 from app.services.pricing_ai_pipeline import simulate_new_prices_with_ai
-from app.utils.logger import ai_logger
-
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -54,17 +52,6 @@ async def ai_suggestions(request: Request, ids: str= ""):
         products = get_products_by_ids(selected_ids)
 
     suggestion = simulate_new_prices_with_ai(products)
-
-    for p in products:
-        ai_logger.info(
-            "product_id=%s | name=%s | base_price=%s | engined_price=%s | ai_coeff=%s | final_price=%s",
-            p.get("product_id"),
-            p.get("name"),
-            p.get("base_price") or p.get("price"),
-            p.get("engined_price"),
-            p.get("ai_coeff"),
-            p.get("final_price")
-        )
 
     return templates.TemplateResponse(
         "ai_suggestions.html",

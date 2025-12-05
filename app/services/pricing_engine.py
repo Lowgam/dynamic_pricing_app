@@ -46,7 +46,7 @@ def calculate_engined_price(
 
     # 2) Discount based on days to expiry
     discount = 0.0
-    if days_to_expiry is None:
+    if days_exp is None:
         # If we do not have any expiration date the discount is 0
         discount = 0.0
 

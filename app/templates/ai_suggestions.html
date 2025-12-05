@@ -44,11 +44,15 @@
     <thead>
         <tr>
             <th>ID</th>
-            <th>Product</th>
-            <th>Current price</th>
-            <th>Engine price (math)</th>
-            <th>AI coeff</th>
-            <th>AI suggested price</th>
+            <th>SKU</th>
+            <th>Product name</th>
+            <th>Category</th>
+            <th>Base price (€)</th>
+            <th>Engined price (€)</th>
+            <th>Coeff. AI</th>
+            <th>Final price (€)</th>
+            <th>Expiry</th>
+            <th>Stock</th>
         </tr>
     </thead>
     <tbody>
@@ -57,13 +61,19 @@
         <!-- Product ID -->
         <td>{{ p.id }}</td>
 
+        <!-- SKU -->
+        <td>{{ p.SKU}}</td>
+
         <!-- Product Name -->
         <td>{{ p.name }}</td>
+
+        <!-- Category -->
+        <td>{{ p.Category }}</td>
 
         <!-- Current price -->
         <td>
             {% if p.base_price is not none %}
-                {{ p.base_price }}
+                {{ "%.2f"|format(p.base_price) }}
             {% else %}
                 -
             {% endif %}
@@ -72,7 +82,7 @@
         <!-- Engine price -->
         <td>
             {% if p.engined_price is not none %}
-                {{ p.engined_price }}
+                {{ "%.2f"|format(p.engined_price) }}
             {% else %}
                 -
             {% endif %}
@@ -81,7 +91,7 @@
         <!-- AI coeff -->
         <td>
             {% if p.ai_coefficient is not none %}
-                {{ p.ai_coefficient }}
+                {{ "%.2f"|format(p.ai_coefficient) }}
             {% else %}
                 -
             {% endif %}
@@ -90,11 +100,18 @@
         <!-- AI suggested price (final_price) -->
         <td>
             {% if p.final_price is not none %}
-                {{ p.final_price }}
+                {{ "%.2f"|format(p.final_price) }}
             {% else %}
                 -
             {% endif %}
         </td>
+
+        <!-- Expiry -->
+        <td> {{ p.expiry_date }}</td>
+
+        <!-- Stock -->
+        <td> {{ p.stock }} </td>
+
     </tr>
     {% endfor %}
 </tbody>

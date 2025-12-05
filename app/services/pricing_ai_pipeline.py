@@ -10,6 +10,7 @@ from typing import List, Dict
 from app.services.pricing_engine import calculate_engined_price, apply_engined_price
 from app.services.feature_builder import build_features
 from app.services.ai_engine import calculate_ai_coefficient
+from app.utils.logger import ai_logger
 
 # ---------------------------------------------------
 # Fx: simulate new prices using AI
@@ -42,6 +43,20 @@ def simulate_new_prices_with_ai(products: List[Dict]) -> List[Dict]:
 
         # 4) Calculate the final price back to the engine
         final_price = apply_engined_price(engined_price, ai_coeff)
+
+        # 4.1) Log AI suggestions
+        ai_logger.info(
+            "AI suggestion | product_id=%s | sku=%s | name=%s | base_price=%s | "
+            "engined_price=%s | ai_coeff=%s | final_price=%s | reason=%s",
+            p.get("id"),
+            p.get("sku"),
+            p.get("name") or p.get("title"),
+            p.get("price"),
+            engined_price,
+            ai_coeff,
+            final_price,
+            ai_output["reason"],
+        )
 
         # 5) Return completed package for UI / API
         result.append({
