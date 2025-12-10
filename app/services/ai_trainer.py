@@ -6,6 +6,7 @@ from datetime import date, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 from app.utils.logger import ai_logger
+from app.database import learning_store
 # In the future we have to import from learning_store.py and sales_history.py (not existing yet)
 
 # ---------------------------------------------------------
@@ -13,11 +14,11 @@ from app.utils.logger import ai_logger
 # ---------------------------------------------------------
 TrainingExample = Dict[str, Any]
 Weights = Dict[str, float]
-Metrics = Dict[str, float]
+Metrics = Dict[str, Any]
 ai_logger = ai_logger
 
 # ---------------------------------------------------------
-# Main trainer entry point PIPELINE
+# 0) Main trainer entry point PIPELINE
 # ---------------------------------------------------------
 def train_once(
         reference_date: Optional[date] = None,
@@ -50,13 +51,6 @@ def train_once(
 
     # 3) Current weights
     current_weights = _load_current_weights()
-    if not current_weights:
-        current_weights = {
-            "w_stock": 1.0,
-            "w_mhd": 1.0,
-            "w_velocity": 1.0,
-            "w_base": 1.0,
-        }
 
     # 4) New weights
     new_weights = _update_weights(current_weights, metrics, learning_rate)
@@ -76,7 +70,7 @@ def train_once(
 
     return {
         "status": "success",
-        "snaposhot_id": snapshot_id,
+        "snapshot_id": snapshot_id,
         "num_examples": len(example),
         "metrics": metrics,
         "old_weights": current_weights,
@@ -98,7 +92,9 @@ def _load_training_examples(reference_date: date, lookback_days: int) -> List[Tr
             "new_price": 4.0,
             "units_before": 10,
             "units_after": 3,
+            "stock": 10,
             "days_to_expiry": 2,
+            "velocity": 1.5,
         },
         {
             "product_id": 2,
@@ -106,7 +102,9 @@ def _load_training_examples(reference_date: date, lookback_days: int) -> List[Tr
             "new_price": 2.5,
             "units_before": 15,
             "units_after": 7,
+            "stock": 15,
             "days_to_expiry": 5,
+            "velocity": 0.8,
         }
     ]
 
@@ -141,6 +139,22 @@ def _compute_metrics(examples: List[TrainingExample]) -> Metrics:
     per_product_count = defaultdict(int)
 
     # ---------------------------------------
+    # FEATURE-SPECIFIC VALUES
+    # ---------------------------------------
+
+    # Stock
+    stock_weighted_st = 0.0
+    stock_weight_sum = 0.0
+
+    # MHD
+    mhd_weighted_st = 0.0
+    mhd_weight_sum = 0.0
+
+    # Velocity
+    velocity_weighted_st = 0.0
+    velocity_weight_sum = 0.0
+
+    # ---------------------------------------
     # OPERATIONS
     # ---------------------------------------
     for ex in examples:
@@ -151,81 +165,165 @@ def _compute_metrics(examples: List[TrainingExample]) -> Metrics:
         if units_before <= 0 or product_id is None:
             continue
 
+        # Feature data for weights
+        stock = float(ex.get("stock", units_before))
+        days_to_expiry = float(ex.get("days_to_expiry", 0))
+        velocity = float(ex.get("velocity", 0.0))
+
+        # ---------------------------------------
+        # SELL THROUGH
+        # ---------------------------------------
+
         # Calculate the sell through in percentage
         sell_through = (units_before - units_after) / units_before
 
-        # GLOBAL st for every example/session
+        # ---------- GLOBAL st for every example/session
         total_st += sell_through
         global_count += 1
 
-        # PRODUCT st for every
+        # ---------- PRODUCT st for every
         per_product_sum[product_id] += sell_through
         per_product_count[product_id] += 1
 
+        # ---------------------------------------
+        # EFFECTS
+        # ---------------------------------------
+
+        # ---------- STOCK EFFECT
+        stock_value = max(stock, 0.0)
+        if stock_value > 0.0:
+            stock_weighted_st += sell_through * stock_value
+            stock_weight_sum += stock_value
+
+        # ---------- MHD EFFECT
+        safe_days = max(days_to_expiry, 0)
+        mhd_weight = 1.0 / (1.0 + safe_days)
+        mhd_weighted_st += sell_through * mhd_weight
+        mhd_weight_sum += mhd_weight
+
+        # ---------- VELOCITY EFFECT
+        safe_velocity = max(velocity, 0.0)
+        vel_weight = 1.0 / (1.0 + safe_velocity)
+        velocity_weighted_st += sell_through * vel_weight
+        velocity_weight_sum += vel_weight
+
+    # ---------- AVG SELL THROUGH
+    # Normal AVG
     avg_sell_through = total_st / global_count if global_count > 0 else 0.0
 
-    # Dict for product
+    # ---------------------------------------
+    # OUTPUT PREP
+    # ---------------------------------------
+
+    # ---------- DICT FOR PRODUCT
     per_product_metrics: Dict[Any, Dict[str, float]] = {}
     for pid, product_total_st in per_product_sum.items():
         count = per_product_count[pid]
         per_product_metrics[pid] = {
+            # Normal AVG
             "avg_sell_through": product_total_st / count if count > 0 else 0.0,
             "num_examples": float(count),
         }
 
+    # ---------- EFFECT FOR FEATURES AND FALLBACK
+    stock_effect = (
+        stock_weighted_st / stock_weight_sum
+        if stock_weight_sum > 0.0 else avg_sell_through
+    )
+    mhd_effect = (
+        mhd_weighted_st / mhd_weight_sum
+        if mhd_weight_sum > 0.0 else avg_sell_through
+    )
+    velocity_effect = (
+        velocity_weighted_st / velocity_weight_sum
+        if velocity_weight_sum > 0.0 else avg_sell_through
+    )
+
+    # ---------- METRICS FOR LOG AND RETURN
     metrics: Metrics = {
         "avg_sell_through": avg_sell_through,
         "num_examples": float(global_count),
         "per_product": per_product_metrics,
+        "stock_effect": stock_effect,
+        "mhd_effect": mhd_effect,
+        "velocity_effect": velocity_effect,
     }
 
     ai_logger.debug(f"[AI TRAINER] Metrics={metrics}")
     return metrics
 
 # ---------------------------------------------------------
-# 3) Loading current weights (placeholder)
+# 3) Loading current weights
 # ---------------------------------------------------------
 def _load_current_weights() -> Weights:
+    # Loading weights from DB
+    db_weights = learning_store.load_current_weights()
+
+    if db_weights:
+        ai_logger.debug(f"[AI TRAINER] Current weights (from DB): {db_weights}")
+        return db_weights
+
+    # Fallback di sicurezza se non ci sono pesi nel DB
     default = {
         "w_stock": 1.0,
         "w_mhd": 1.0,
         "w_velocity": 1.0,
         "w_base": 1.0,
     }
-    ai_logger.debug(f"[AI TRAINER] Current weights (default): {default}")
+    ai_logger.warning("[AI TRAINER] No weights in DB, using default=%s", default)
     return default
-
 # ---------------------------------------------------------
-# 3) Update weights (placeholder)
+# 3) Update weights
 # ---------------------------------------------------------
 def _update_weights(
         current_weights: Weights,
         metrics: Metrics,
         learning_rate: float
 ) -> Weights:
-    avg_sell_through = metrics.get("avg_sell_through", 0.0)
+    # ---------- Global metrics and for features
+    avg_sell_through = float(metrics.get("avg_sell_through", 0.0))
+    stock_effect = float(metrics.get("stock_effect", avg_sell_through))
+    mhd_effect = float(metrics.get("mhd_effect", avg_sell_through))
+    velocity_effect = float(metrics.get("velocity_effect", avg_sell_through))
 
     new_weights = current_weights.copy()
 
     # We set here an ideal value (0.7 sell through)
     # It is made to measure if th AI has to become more or less aggressive
     target_sell_through = 0.7
-    error = target_sell_through - avg_sell_through
+
+    # Map: weight -> metrics  to be used
+    feature_effect = {
+        "w_stock": stock_effect,
+        "w_mhd": mhd_effect,
+        "w_velocity": velocity_effect,
+    }
 
     # For cycle writte like this is an elegant form to update more keys. It works well with Dict
-    for key in ("w_stock", "w_mhd", "w_velocity"):
-        old_value = new_weights.get(key, 1.0)
+    # key: weight's name (w_stock, w_mhd...), effect: associated metric (stock_effect, mhd_effect...)
+    for key, effect in (feature_effect.items()):
+
+        # 1) It takes here the actual value of the weight
+        old_value = float(new_weights.get(key, 1.0))
+        # 2) It calculate the error fot that feature
+        error = target_sell_through - effect
+        # 3) Update the new value
         # Classic formula for gradient update, used a lot in machine learning
         # Leaning rate defines here how quick AI learns: higher value means bigger changes, bigger wins or bigger mistakes
         new_value = old_value + learning_rate * error
-
+        # 4) Apply security limits
+        new_value = max(0.1, min(new_value, 5.0))
+        # 5) Save new weight
         new_weights[key] = new_value
 
     ai_logger.debug(
-        "Weights update | old=%s, new=%s, error=%.4f",
+        "[AI TRAINER] Weights update | old=%s, new=%s,"
+        "stock_effect=%.4f, mhd_effect=%.4f, velocity_effect=%.4f",
         current_weights,
         new_weights,
-        error,
+        stock_effect,
+        mhd_effect,
+        velocity_effect
     )
     return new_weights
 
@@ -237,25 +335,53 @@ def _save_weights_snapshot(
         new_weights: Weights,
         reference_date: date,
         metrics: Metrics,
-) -> str:
-    # It saves the values in a store. It is useful for rollbacks for AI weights
+) -> int:
+    note = f"AI training on {reference_date.isoformat()}"
 
-    # TODO integrate with learning_store.save_new_weights_snapshot(...)
-    snapshot_id = f"snapshot-{reference_date.isoformat()}"
-
-    ai_logger.info(
-        "Snapshot pesi salvati (FAKE) | id=%s | metrics=%s | old_weights=%s | new_weights=%s",
-        snapshot_id,
-        metrics,
-        old_weights,
-        new_weights,
+    snapshot_id = learning_store.save_new_weights_snapshot(
+        new_weights=new_weights,
+        note=note,
     )
+
+    if snapshot_id == -1:
+        ai_logger.error(
+            "[AI TRAINER] Error saving weights snapshot | metrics=%s | old=%s | new=%s",
+            metrics,
+            old_weights,
+            new_weights,
+        )
+    else:
+        ai_logger.info(
+            "[AI TRAINER] Snapshot saved | id=%s | metrics=%s | old=%s | new=%s",
+            snapshot_id,
+            metrics,
+            old_weights,
+            new_weights,
+        )
 
     return snapshot_id
 
 # ---------------------------------------------------------
-# Test manuale da terminale
+# TESTING
 # ---------------------------------------------------------
 if __name__ == "__main__":
     result = train_once()
-    print(result)
+
+    print("\n========== AI TRAINER SUMMARY ==========")
+    print(f"Status        : {result.get('status')}")
+    print(f"Snapshot ID   : {result.get('snapshot_id') or result.get('snaposhot_id')}")
+    print(f"Num examples  : {result.get('num_examples')}")
+
+    print("\n--- Metrics ---")
+    metrics = result.get("metrics", {})
+    print(f"  Avg sell-through  : {metrics.get('avg_sell_through'):.4f}")
+    print(f"  Stock effect      : {metrics.get('stock_effect'):.4f}")
+    print(f"  MHD effect        : {metrics.get('mhd_effect'):.4f}")
+    print(f"  Velocity effect   : {metrics.get('velocity_effect'):.4f}")
+    print(f"  Per-product       : {metrics.get('per_product')}")
+
+    print("\n--- Weights ---")
+    print(f"  Old weights : {result.get('old_weights')}")
+    print(f"  New weights : {result.get('new_weights')}")
+
+    print("========================================\n")
