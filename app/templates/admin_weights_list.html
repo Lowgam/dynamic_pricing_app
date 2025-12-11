@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin – AI Weights Snapshots</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        h2 {
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border-bottom: 1px solid #226e3a;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #f5f5f5;
+        }
+        tr:hover {
+            background: #f0f0f0;
+        }
+        .id-col {
+            width: 80px;
+        }
+        .actions {
+            white-space: nowrap;
+        }
+        .badge-current {
+            font-size: 0.85rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #d1ffd1;
+            border: 1px solid #6bbb6b;
+        }
+        .current-row {
+            background: #f0fff0;
+        }
+        .panel {
+            border: 1px solid #b61111;
+            padding: 10px 12px;
+            border-radius: 6px;
+            background: #fafafa;
+            display: inline-block;
+        }
+        .panel dt {
+            font-weight: bold;
+        }
+        .panel dd {
+            margin: 0 0 6px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>📊 Admin – AI Weights Snapshots</h1>
+
+{% if request.query_params.get('rollback') == 'success' %}
+    <div style="
+        padding: 10px;
+        margin-bottom: 15px;
+        background: #e5ffe5;
+        border: 1px solid #77c977;
+        border-radius: 5px;
+    ">
+        ✔ Rollback eseguito con successo.
+    </div>
+{% endif %}
+
+
+{# --- Pannello pesi correnti --- #}
+<h2>Pesi correnti IA</h2>
+
+{% if current_weights %}
+    <div class="panel">
+        <dl>
+            <dt>w_stock</dt>
+            <dd>{{ current_weights.w_stock }}</dd>
+
+            <dt>w_mhd</dt>
+            <dd>{{ current_weights.w_mhd }}</dd>
+
+            <dt>w_velocity</dt>
+            <dd>{{ current_weights.w_velocity }}</dd>
+
+            <dt>w_base</dt>
+            <dd>{{ current_weights.w_base }}</dd>
+        </dl>
+    </div>
+{% else %}
+    <p><em>Nessun peso corrente trovato (tabella ai_current_weights vuota?).</em></p>
+{% endif %}
+
+{# --- Tabella snapshot --- #}
+<h2>Storico snapshot pesi</h2>
+
+<p>Totale snapshot: {{ snapshots|length }}</p>
+
+<table>
+    <thead>
+    <tr>
+        <th class="id-col">ID</th>
+        <th>Created at</th>
+        <th>w_stock</th>
+        <th>w_mhd</th>
+        <th>w_velocity</th>
+        <th>w_base</th>
+        <th>Stato</th>
+        <th class="actions">Azioni</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for s in snapshots %}
+        <tr class="{% if s.is_current %}current-row{% endif %}">
+            <td>{{ s.id }}</td>
+            <td>{{ s.created_at }}</td>
+            <td>{{ s.w_stock }}</td>
+            <td>{{ s.w_mhd }}</td>
+            <td>{{ s.w_velocity }}</td>
+            <td>{{ s.w_base }}</td>
+            <td>
+                {% if s.is_current %}
+                    <span class="badge-current">✓ Corrente</span>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td class="actions">
+                <a href="/admin/weights/{{ s.id }}">Dettagli</a>
+                <!-- Il rollback lo collegheremo dopo -->
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="8">Nessuno snapshot trovato.</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

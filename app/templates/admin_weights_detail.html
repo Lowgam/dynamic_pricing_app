@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dettaglio snapshot pesi – ID {{ snapshot.id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            margin-bottom: 10px;
+        }
+        .badge-current {
+            font-size: 0.85rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #d1ffd1;
+            border: 1px solid #6bbb6b;
+            margin-left: 8px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border-bottom: 1px solid #ddd;
+            padding: 6px 10px;
+            text-align: left;
+        }
+        th {
+            background: #f5f5f5;
+        }
+        .diff {
+            font-weight: bold;
+        }
+        .highlight {
+            background: #fff5e6;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        .buttons a, .buttons button {
+            display: inline-block;
+            padding: 8px 14px;
+            margin-right: 10px;
+            border-radius: 4px;
+            border: 1px solid #888;
+            background: #f5f5f5;
+            cursor: pointer;
+            text-decoration: none;
+            color: black;
+        }
+        .buttons button.rollback {
+            border-color: #c0392b;
+            background: #fbeaea;
+        }
+    </style>
+</head>
+<body>
+
+<h1>
+    Snapshot pesi – ID {{ snapshot.id }}
+    {% if is_current %}
+        <span class="badge-current">✓ Corrente</span>
+    {% endif %}
+</h1>
+
+<p>Creato il: <strong>{{ snapshot.created_at }}</strong></p>
+
+<h2>Confronto pesi</h2>
+
+{% if current_weights %}
+<table>
+    <thead>
+    <tr>
+        <th>Peso</th>
+        <th>Snapshot</th>
+        <th>Corrente</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for key in ["w_stock", "w_mhd", "w_velocity", "w_base"] %}
+        {% set snap_val = snapshot[key] %}
+        {% set curr_val = current_weights[key] %}
+        {% set same = (snap_val == curr_val) %}
+        <tr class="{% if not same %}highlight{% endif %}">
+            <td>{{ key }}</td>
+            <td>{{ snap_val }}</td>
+            <td class="{% if not same %}diff{% endif %}">{{ curr_val }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><em>Nessun peso corrente trovato (tabella ai_current_weights vuota?). Il confronto non è disponibile.</em></p>
+{% endif %}
+
+<div class="buttons">
+    <a href="/admin/weights">⬅ Torna alla lista snapshot</a>
+
+    {% if not is_current %}
+    <form method="post" action="/admin/weights/{{ snapshot.id }}/rollback"
+          style="display:inline;"
+          onsubmit="return confirm('Sei sicuro di voler fare rollback a questo snapshot?');">
+        <button type="submit" class="rollback">
+            🔄 Rollback a questo snapshot
+        </button>
+    </form>
+    {% else %}
+        <!-- Se è già quello corrente, niente rollback -->
+    {% endif %}
+</div>
+
+</body>
+</html>
