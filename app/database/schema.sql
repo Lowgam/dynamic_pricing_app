@@ -1,5 +1,6 @@
 -- Module: schema.sql
 -- This file will create the tabs we will need for all the products and rules. It isn't automatically executed by python.
+
 -- =========================
 -- Tab: products
 -- =========================
@@ -78,3 +79,37 @@ CREATE TABLE IF NOT EXISTS pricing_rules (
     threshold DOUBLE NOT NULL,
     active BOOLEAN NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+-- =========================
+-- Tab: change_price_events
+-- =========================
+CREATE TABLE change_price_events (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  product_id INT NOT NULL,
+
+  old_price DECIMAL(10,2) NOT NULL,
+  new_price DECIMAL(10,2) NOT NULL,
+
+  changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  source VARCHAR(50) NOT NULL DEFAULT 'dashboard',
+
+  status ENUM('OPEN','CLOSED') NOT NULL DEFAULT 'OPEN',
+
+  -- outcome
+  units_before INT NULL,
+  units_after INT NULL,
+  window_days INT NULL,
+  closed_at DATETIME NULL,
+
+  weights_snapshot_id INT NULL,
+
+  INDEX idx_cpe_product_time (product_id, changed_at),
+  INDEX idx_cpe_status (status),
+
+  CONSTRAINT fk_cpe_product
+    FOREIGN KEY (product_id) REFERENCES products(id)
+    ON DELETE CASCADE
+);
+

@@ -1,13 +1,15 @@
 # Module : dashboard.py
 # Purpose : Creation dashboard endpoint
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
 from typing import List
 
+from starlette.responses import RedirectResponse
+
 from app.services.chart_data_builder import build_chart_data
-from app.database.queries import get_products_by_ids
+from app.database.queries import get_products_by_ids, get_all_products, update_product, insert_change_price_event
 from app.services.pricing_ai_pipeline import simulate_new_prices_with_ai
 
 router = APIRouter()
@@ -18,9 +20,10 @@ templates = Jinja2Templates(directory="app/templates")
 # ---------------------------------------------------
 @router.get("/dashboard")
 async def dashboard_page(request: Request):
+    products = get_all_products()
     return templates.TemplateResponse(
         "dashboard.html",
-        {"request": request}
+        {"request": request, "products": products,}
     )
 
 # ---------------------------------------------------
@@ -58,5 +61,38 @@ async def ai_suggestions(request: Request, ids: str= ""):
         {
             "request": request,
             "products": suggestion,
+            "ids": ids,
         },
     )
+
+# ---------------------------------------------------
+# FX: Post endpoint for suggestion -> apply
+# ---------------------------------------------------
+@router.post("/ai-suggestions/apply")
+async def ai_suggestions_apply(request: Request, ids: str= ""):
+    # Reads body from POST request (in HTML template)
+    form = await request.form()
+    ids = (form.get("ids") or ids or "").strip()
+
+    selected_ids: List[int] = [int(x) for x in ids.split(",") if x.strip()]
+    if not selected_ids:
+        raise HTTPException(status_code=400, detail="No ids selected (empty ids)")
+
+    products = get_products_by_ids(selected_ids)
+    if not products:
+        raise HTTPException(status_code=404, detail="No products found")
+
+    old_price_by_id = {p["id"]: float (p["price"]) for p in products}
+
+    suggestion = simulate_new_prices_with_ai(products)
+
+    for p in suggestion:
+        pid = int(p["id"])
+        old_price = old_price_by_id.get(pid)
+        new_price = float(p["final_price"])
+
+        update_product(pid, new_price)
+        insert_change_price_event(pid,old_price, new_price, source="ai-suggestions")
+
+    return RedirectResponse(url=f"/ai-suggestions?ids={ids}&applied=1", status_code=303)
+

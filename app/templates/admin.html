@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin dashboard</title>
+</head>
+<body>
+
+<h2>Admin dashboard</h2>
+
+{% if request.query_params.get('sync') == 'ok' %}
+  <p><b>Sync completato.</b> Closed={{ request.query_params.get('closed') }} (days={{ request.query_params.get('days') }})</p>
+{% endif %}
+
+
+<!-- 1) Link ai pesi -->
+<p>
+    <a href="/admin/weights">
+        <button>Manage AI weights</button>
+    </a>
+</p>
+
+<!-- 2) Sync events -->
+<form method="post" action="/admin/sync">
+    <button type="submit">Sync change price events</button>
+</form>
+
+</body>
+</html>

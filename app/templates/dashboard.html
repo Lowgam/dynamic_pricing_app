@@ -112,25 +112,18 @@
             </tr>
             </thead>
             <tbody>
-            <!-- Temporary mock datas -->
-            <tr class="product-row" data-product-id="1">
-                <td class="col-select">
-                    <input type="checkbox" class="row-select">
-                </td>
-                <td>1</td>
-                <td>Prodotto A</td>
-                <td>3.99 €</td>
-            </tr>
+{% for p in products %}
+<tr class="product-row" data-product-id="{{ p['id'] }}">
+    <td class="col-select">
+        <input type="checkbox" class="row-select">
+    </td>
+    <td>{{ p['id'] }}</td>
+    <td>{{ p.get('title') or p.get('name') or p.get('product_name') or '—' }}</td>
+    <td>{{ "%.2f"|format(p['price']) }} €</td>
+</tr>
+{% endfor %}
+</tbody>
 
-            <tr class="product-row" data-product-id="2">
-                <td class="col-select">
-                    <input type="checkbox" class="row-select">
-                </td>
-                <td>2</td>
-                <td>Prodotto B</td>
-                <td>2.49 €</td>
-            </tr>
-            </tbody>
         </table>
 
         <!-- NEW: Button to trigger AI suggestions for selected products -->

@@ -3,7 +3,7 @@
 
 from .db import get_connection, get_dict_cursor
 from mysql.connector import Error
-from typing import List
+from typing import List, Optional
 
 # ---------------------------------------------------
 # Fx: get all products from DB
@@ -94,7 +94,7 @@ def import_mock_products(products: list):
 # ---------------------------------------------------
 # Fx: update products
 # ---------------------------------------------------
-def update_product(product_id: id, new_price: float):
+def update_product(product_id: int, new_price: float):
     conn = None
     cursor = None
     try:
@@ -181,3 +181,58 @@ def get_products_by_ids(ids: List[int]):
     rows = get_all_products()
     print("TEST get_all_products():")
     pprint(rows)
+
+# ---------------------------------------------------
+# Fx: insert change in price events
+# ---------------------------------------------------
+def insert_change_price_event(
+        product_id: int,
+        old_price: float,
+        new_price: float,
+        source: str = "dashboard",
+        weights_snapshot_id: Optional[int] = None
+):
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # 1) Control : if there is an OPEN product with the same id, close it
+        sql_search = """
+            SELECT id, changed_at
+            FROM change_price_events
+            WHERE product_id = %s AND status = 'OPEN'
+            ORDER BY changed_at DESC
+            LIMIT 1
+            """
+        cursor.execute(sql_search, (product_id,))
+        existing = cursor.fetchone()
+
+        if existing:
+            sql_close_event = """
+                UPDATE change_price_events
+                SET status = 'CLOSED',
+                    closed_at = NOW(),
+                    window_days = DATEDIFF(NOW(), changed_at)
+                WHERE id = %s
+                """
+            cursor.execute(sql_close_event, (existing["id"],))
+
+
+        # 2) Create new event
+        sql = """
+        INSERT INTO change_price_events
+        (product_id, old_price, new_price, source, status, weights_snapshot_id)
+        VALUES (%s, %s, %s, %s, 'OPEN', %s)
+        """
+
+        cursor.execute(sql, (product_id, old_price, new_price, source, weights_snapshot_id))
+        conn.commit()
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()

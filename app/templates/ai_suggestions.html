@@ -118,6 +118,15 @@
 
 </table>
 
+<!-- Button for confirmation and application new prices.
+     it is exactly here that we pass the returning value from /ai-suggestion
+     to /apply. Here is where the magic happens. -->
+<form method="post" action="/ai-suggestions/apply">
+  <input type="hidden" name="ids" value="{{ ids }}">
+  <button type="submit">Conferma / Applica prezzi</button>
+</form>
+
+
 <a class="back-link" href="/dashboard">← Back to dashboard</a>
 
 </body>
