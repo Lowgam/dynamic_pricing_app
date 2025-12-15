@@ -3,8 +3,9 @@
 #           saves a new version of weights in learning_store.py (enabling rollback)
 from collections import defaultdict
 from datetime import date, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
+from app.database.db import get_connection
 from app.utils.logger import ai_logger
 from app.database import learning_store
 # In the future we have to import from learning_store.py and sales_history.py (not existing yet)
@@ -78,35 +79,70 @@ def train_once(
     }
 
 # ---------------------------------------------------------
-# 1) Load training data (placeholder)
+# 1) Load training data from change_price_evens
 # ---------------------------------------------------------
 def _load_training_examples(reference_date: date, lookback_days: int) -> List[TrainingExample]:
     start = reference_date - timedelta(days=lookback_days)
     ai_logger.debug(
-        f"[AI TRAINER] Loading training examples from {reference_date}, ")
+        f"[AI TRAINER] Loading training examples up to %s (start=%s, lookback=%s)",
+        reference_date,start,lookback_days
+    )
 
-    return[
-        {
-            "product_id": 1,
-            "old_price": 5.0,
-            "new_price": 4.0,
-            "units_before": 10,
-            "units_after": 3,
-            "stock": 10,
-            "days_to_expiry": 2,
-            "velocity": 1.5,
-        },
-        {
-            "product_id": 2,
-            "old_price": 3.0,
-            "new_price": 2.5,
-            "units_before": 15,
-            "units_after": 7,
-            "stock": 15,
-            "days_to_expiry": 5,
-            "velocity": 0.8,
-        }
-    ]
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        sql = """
+        SELECT
+            product_id,
+            old_price,
+            new_price,
+            units_before,
+            units_after,
+            stock_at_close,
+            days_to_expiry_at_close,
+            velocity_at_close
+        FROM change_price_events
+        WHERE status = 'CLOSED'
+          AND DATE(changed_at) >= %s
+          AND DATE(changed_at) <= %s
+        ORDER BY changed_at DESC
+        """
+
+        cursor.execute(sql, (start, reference_date))
+        rows = cursor.fetchall()
+
+        examples : List[TrainingExample] = []
+        for r in rows:
+            if r["units_before"] is None or r["units_after"] is None:
+                continue
+
+            examples.append({
+                "product_id": int(r["product_id"]),
+                "old_price": float(r["old_price"]),
+                "new_price": float(r["new_price"]),
+                "units_before": int(r["units_before"]),
+                "units_after": int(r["units_after"]),
+                "stock": int(r.get["stock_at_close"] or 0),
+                "days_to_expiry": int(r.get["days_to_expiry_at_close"] or 0),
+                "velocity": float(r.get["velocity_at_close"] or 0.0),
+            })
+
+        ai_logger.info("[AI TRAINER] Loaded %s training examples from CLOSED events", len(examples))
+        return examples
+
+    except Exception as ex:
+        ai_logger.error("[AI TRAINER] Failed to load training examples: %s", ex)
+        return []
+
+    finally:
+        if conn:
+            conn.close()
+        if cursor:
+            cursor.close()
 
 # ---------------------------------------------------------
 # 2) Aggregated metrics

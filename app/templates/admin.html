@@ -12,8 +12,34 @@
   <p><b>Sync completato.</b> Closed={{ request.query_params.get('closed') }} (days={{ request.query_params.get('days') }})</p>
 {% endif %}
 
+{% if request.query_params.get('train') %}
+  {% set train_status = request.query_params.get('train') %}
+  {% set msg = request.query_params.get('msg') %}
 
-<!-- 1) Link ai pesi -->
+  <div style="padding:10px; border:1px solid #ccc; border-radius:8px; margin:12px 0;">
+    {% if train_status == 'ok' %}
+      ✅ <b>Training completato</b>.
+      Esempi usati: <b>{{ request.query_params.get('examples', '0') }}</b>
+      {% if request.query_params.get('snapshot') %}
+        — Snapshot: <b>#{{ request.query_params.get('snapshot') }}</b>
+      {% endif %}
+
+    {% elif train_status == 'skipped' and msg == 'no_closed_events' %}
+      ⚠️ <b>Training saltato</b>: non ci sono eventi <b>CLOSED</b> con outcome disponibile.
+      (Fai prima un sync che chiuda eventi e assicurati che units_before/units_after siano valorizzati.)
+
+    {% elif train_status == 'error' %}
+      ❌ <b>Training fallito</b>. Controlla i log.
+
+    {% else %}
+      ℹ️ <b>Training</b>: stato = {{ train_status }}{% if msg %}, msg={{ msg }}{% endif %}
+    {% endif %}
+  </div>
+{% endif %}
+
+
+
+<!-- 1) Link to weights -->
 <p>
     <a href="/admin/weights">
         <button>Manage AI weights</button>
@@ -23,6 +49,17 @@
 <!-- 2) Sync events -->
 <form method="post" action="/admin/sync">
     <button type="submit">Sync change price events</button>
+</form>
+
+<!-- 3) AI train -->
+<hr>
+
+<h3>AI Trainer</h3>
+
+<form action="/admin/train" method="post" style="display:inline-block;">
+  <label for="lookback_days">Lookback days:</label>
+  <input id="lookback_days" name="lookback_days" type="number" value="14" min="1" max="365">
+  <button type="submit">🔁 Avvia training IA</button>
 </form>
 
 </body>

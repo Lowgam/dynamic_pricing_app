@@ -41,7 +41,7 @@ def simulate_new_prices_with_ai(products: List[Dict]) -> List[Dict]:
         ai_output = calculate_ai_coefficient(engined_price, features)
         ai_coeff = ai_output["coefficient"]
 
-        # 4) Calculate the final price back to the engine
+        # 4) Calculate the final price with AI coefficient
         final_price = apply_engined_price(engined_price, ai_coeff)
 
         # 4.1) Log AI suggestions
