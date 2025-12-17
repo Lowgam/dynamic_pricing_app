@@ -2,7 +2,7 @@
 # Purpose : Create the heart of the modifying logic for the prices
 
 from typing import Optional
-from app.utils.date_utils import days_to_expiry
+from app.core.utils.date_utils import days_to_expiry
 
 # This function is used to calculate how many days are left to the expiration of a product
 # It is the base of the next function.

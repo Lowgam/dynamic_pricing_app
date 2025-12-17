@@ -10,7 +10,7 @@ from app.database.learning_store import (
     load_current_weights,
     rollback_weights
 )
-from app.utils.logger import ai_logger
+from app.core.utils import ai_logger
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")

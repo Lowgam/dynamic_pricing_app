@@ -6,8 +6,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
 from app.database.queries import get_all_products
-from app.services.pricing_pipeline import simulate_new_prices_from_mock
-from app.services.pricing_db_pipeline import simulate_prices_from_db
+from app.core.services.pricing_pipeline import simulate_new_prices_from_mock
+from app.core.services.pricing_db_pipeline import simulate_prices_from_db
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")

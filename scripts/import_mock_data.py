@@ -3,7 +3,7 @@
 # who execute the SQL query insert_product
 # A script is a file who contains a series of commands automatically executed. Usually import data, create backups, tests, create simulations
 
-from app.services.shopify_connector import fetch_products_from_shopify_mock
+from app.core.services.shopify_connector import fetch_products_from_shopify_mock
 from app.database.queries import import_mock_products
 
 

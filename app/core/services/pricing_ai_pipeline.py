@@ -7,10 +7,10 @@ from __future__ import annotations
 
 from typing import List, Dict
 
-from app.services.pricing_engine import calculate_engined_price, apply_engined_price
-from app.services.feature_builder import build_features
-from app.services.ai_engine import calculate_ai_coefficient
-from app.utils.logger import ai_logger
+from app.core.services.pricing_engine import calculate_engined_price, apply_engined_price
+from app.core.services.feature_builder import build_features
+from app.core.services.ai_engine import calculate_ai_coefficient
+from app.core.utils.logger import ai_logger
 
 # ---------------------------------------------------
 # Fx: simulate new prices using AI

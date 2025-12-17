@@ -4,8 +4,8 @@
 from fastapi import APIRouter, Form
 from fastapi.responses import RedirectResponse
 
-from app.services.ai_trainer import train_once
-from app.utils.logger import ai_logger
+from app.core.services import train_once
+from app.core.utils import ai_logger
 
 router = APIRouter()
 

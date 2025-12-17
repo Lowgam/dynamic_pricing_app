@@ -6,7 +6,7 @@ from datetime import date, timedelta
 from typing import Any, Dict, List, Optional
 
 from app.database.db import get_connection
-from app.utils.logger import ai_logger
+from app.core.utils.logger import ai_logger
 from app.database import learning_store
 # In the future we have to import from learning_store.py and sales_history.py (not existing yet)
 

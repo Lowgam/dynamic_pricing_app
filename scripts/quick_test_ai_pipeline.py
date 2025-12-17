@@ -1,7 +1,7 @@
 # scripts/quick_test_ai_pipeline.py
 
 from app.database.queries import get_all_products  # o la tua funzione equivalente
-from app.services.pricing_ai_pipeline import simulate_new_prices_with_ai
+from app.core.services.pricing_ai_pipeline import simulate_new_prices_with_ai
 
 def main():
     products = get_all_products()

@@ -2,7 +2,7 @@
 # Purpose : Extract and prepare necessary features for ai_engine
 
 from typing import Dict, Any
-from app.utils.date_utils import days_to_expiry
+from app.core.utils.date_utils import days_to_expiry
 
 # ---------------------------------------------------
 # Fx: Build the features for AI

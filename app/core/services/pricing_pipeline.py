@@ -3,10 +3,11 @@
 
 from __future__ import annotations
 
-from typing import List, Dict, Optional
+from typing import List, Dict
 
-from app.services.pricing_engine import calculate_engined_price
-from app.services.shopify_connector import fetch_products_from_shopify_mock, ShopifyProduct
+from app.core.services.pricing_engine import calculate_engined_price
+from app.core.services.shopify_connector import fetch_products_from_shopify_mock
+
 
 # ---------------------------------------------------
 # Fx: Connect shopify_connector with the engine

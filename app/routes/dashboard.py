@@ -8,9 +8,9 @@ from typing import List
 
 from starlette.responses import RedirectResponse
 
-from app.services.chart_data_builder import build_chart_data
+from app.core.services.chart_data_builder import build_chart_data
 from app.database.queries import get_products_by_ids, get_all_products, update_product, insert_change_price_event
-from app.services.pricing_ai_pipeline import simulate_new_prices_with_ai
+from app.core.services.pricing_ai_pipeline import simulate_new_prices_with_ai
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
