@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import List, Dict
 
 from app.core.services.pricing_engine import calculate_engined_price
-from app.core.services.shopify_connector import fetch_products_from_shopify_mock
+from app.core.services.debug.shopify_connector import fetch_products_from_shopify_mock
 
 
 # ---------------------------------------------------

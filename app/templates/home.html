@@ -1,12 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>APricing – Home</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
 
-<h2>APricing – Main</h2>
+{% block content %}
+
+<style>
+  
+  p{
+    display: flex;
+    justify-content: center;
+  }
+
+  #welcome{
+    text-align: center;
+  }
+</style>
+
+<h2>Automatic Pricer</h2>
+
+<p id="welcome">Welcome in Automatic Pricer! <br> This web app is designed to allow you to update products <br> on your e-commerce site automatically and intelligently.</p>
 
 <p>
   <a href="/dashboard"><button>Dashboard</button></a>
@@ -16,5 +27,5 @@
   <a href="/admin"><button>Admin</button></a>
 </p>
 
-</body>
-</html>
+{% endblock %}
+

@@ -93,7 +93,7 @@ def _load_training_examples(reference_date: date, lookback_days: int) -> List[Tr
 
     try:
         conn = get_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
 
         sql = """
         SELECT
@@ -107,6 +107,7 @@ def _load_training_examples(reference_date: date, lookback_days: int) -> List[Tr
             velocity_at_close
         FROM change_price_events
         WHERE status = 'CLOSED'
+          AND closed_at IS NOT NULL
           AND DATE(changed_at) >= %s
           AND DATE(changed_at) <= %s
         ORDER BY changed_at DESC
@@ -126,9 +127,9 @@ def _load_training_examples(reference_date: date, lookback_days: int) -> List[Tr
                 "new_price": float(r["new_price"]),
                 "units_before": int(r["units_before"]),
                 "units_after": int(r["units_after"]),
-                "stock": int(r.get["stock_at_close"] or 0),
-                "days_to_expiry": int(r.get["days_to_expiry_at_close"] or 0),
-                "velocity": float(r.get["velocity_at_close"] or 0.0),
+                "stock": int(r.get("stock_at_close") or 0),
+                "days_to_expiry": int(r.get("days_to_expiry_at_close") or 0),
+                "velocity": float(r.get("velocity_at_close") or 0.0),
             })
 
         ai_logger.info("[AI TRAINER] Loaded %s training examples from CLOSED events", len(examples))
@@ -139,10 +140,10 @@ def _load_training_examples(reference_date: date, lookback_days: int) -> List[Tr
         return []
 
     finally:
-        if conn:
-            conn.close()
         if cursor:
             cursor.close()
+        if conn:
+            conn.close()
 
 # ---------------------------------------------------------
 # 2) Aggregated metrics

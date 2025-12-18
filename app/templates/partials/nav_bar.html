@@ -1,0 +1,16 @@
+<div class="nav-bar">
+  <button onclick="goBack()">⬅️ Indietro</button>
+  <a href="/">Automatic Pricer</a>
+</div>
+
+<script>
+function goBack() {
+  if (document.referrer) {
+    history.back();
+  } else {
+    window.location.href = "/";
+  }
+}
+</script>
+
+<hr>

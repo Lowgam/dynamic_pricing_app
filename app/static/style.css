@@ -1,0 +1,15 @@
+body {
+  font-family: "Courier New", monospace;
+  background-color: #1b3f93;
+}
+.nav-bar {
+  margin-bottom: 15px;
+}
+
+.nav-bar button,
+.nav-bar a {
+  display: flex;
+  margin-right: 8px;
+  justify-content: center;
+}
+

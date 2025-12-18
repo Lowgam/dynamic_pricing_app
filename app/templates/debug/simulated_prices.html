@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Simulated Prices</title>
+    <link rel="stylesheet" href="/static/style.css">
+    
     <style>
         :root {
             --bg: #f5f5f7;
@@ -114,6 +116,7 @@
     </style>
 </head>
 <body>
+{% include "partials/nav_bar.html" %}
 
 <div class="page">
     <div class="header">
@@ -147,6 +150,7 @@
                         <th>Diff (€)</th>
                         <th>Expiry date</th>
                         <th>Stock</th>
+                        <th>Velocity (14d)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -195,6 +199,7 @@
                         </td>
 
                         <td>{{ p.stock }}</td>
+                        <td>{{ p.sales_velocity }}</td>
                     </tr>
 
                 {% endfor %}

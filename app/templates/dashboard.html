@@ -1,104 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #83b48c;
-        }
+{% block content %}
 
-        h2 {
-            margin-bottom: 20px;
-        }
+<style>
+    body {
+        margin: 20px;
+        background-color: #83b48c;
+    }
 
-        .container {
-            display: flex;
-            gap: 30px;
-            align-items: flex-start;
-        }
+    h2 {
+        margin-bottom: 20px;
+    }
 
-        .table-box,
-        .chart-box {
-            border: 1px solid #ccc;
-            padding: 15px;
-            border-radius: 8px;
-            width: 50%;
-            background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
+    .container {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+    }
 
-        /* Scrollable list */
-        .table-box {
-            max-height: 400px;        
-            overflow-y: auto;          
-        }
+    .table-box,
+    .chart-box {
+        border: 1px solid #ccc;
+        padding: 15px;
+        border-radius: 8px;
+        width: 50%;
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+    /* Scrollable list */
+    .table-box {
+        max-height: 400px;
+        overflow-y: auto;
+    }
 
-        table th,
-        table td {
-            border-bottom: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        table th {
-            background-color: #f0f0f0;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
+    table th,
+    table td {
+        border-bottom: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
 
-        /* Righe prodotti cliccabili */
-        .product-row {
-            cursor: pointer;
-        }
+    table th {
+        background-color: #f0f0f0;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
 
-        .product-row:hover {
-            background-color: #f9f9f9;
-        }
+    /* Clickable product rows */
+    .product-row {
+        cursor: pointer;
+    }
 
-        .product-row.selected {
-            background-color: #e6f3ff;
-        }
+    .product-row:hover {
+        background-color: #f9f9f9;
+    }
 
-        /* Colonna checkbox */
-        .col-select {
-            width: 40px;
-            text-align: center;
-        }
+    .product-row.selected {
+        background-color: #e6f3ff;
+    }
 
-        .controls-box {
-            margin-bottom: 10px;
-        }
+    /* Checkbox column */
+    .col-select {
+        width: 40px;
+        text-align: center;
+    }
 
-        .controls-box p {
-            margin: 0 0 5px 0;
-            font-size: 0.9rem;
-            color: #666;
-        }
-    </style>
+    .controls-box {
+        margin-bottom: 10px;
+    }
 
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-</head>
-<body>
+    .controls-box p {
+        margin: 0 0 5px 0;
+        font-size: 0.9rem;
+        color: #666;
+    }
+</style>
 
 <h2>Products dashboard</h2>
 
 <div class="container">
 
-    <!-- LEFT BOX: products Tab (mock atm) -->
+    <!-- LEFT BOX: products table -->
     <div class="table-box">
-        <h3>Products List</h3>
+        <h3>Products list</h3>
 
         <table>
             <thead>
@@ -112,21 +104,20 @@
             </tr>
             </thead>
             <tbody>
-{% for p in products %}
-<tr class="product-row" data-product-id="{{ p['id'] }}">
-    <td class="col-select">
-        <input type="checkbox" class="row-select">
-    </td>
-    <td>{{ p['id'] }}</td>
-    <td>{{ p.get('title') or p.get('name') or p.get('product_name') or '—' }}</td>
-    <td>{{ "%.2f"|format(p['price']) }} €</td>
-</tr>
-{% endfor %}
-</tbody>
-
+            {% for p in products %}
+            <tr class="product-row" data-product-id="{{ p['id'] }}">
+                <td class="col-select">
+                    <input type="checkbox" class="row-select">
+                </td>
+                <td>{{ p['id'] }}</td>
+                <td>{{ p.get('title') or p.get('name') or p.get('product_name') or '—' }}</td>
+                <td>{{ "%.2f"|format(p['price']) }} €</td>
+            </tr>
+            {% endfor %}
+            </tbody>
         </table>
 
-        <!-- NEW: Button to trigger AI suggestions for selected products -->
+        <!-- Button to trigger AI suggestions for selected products -->
         <button type="button" id="aiSuggestionBtn">
             AI Suggestion for selected products
         </button>
@@ -134,58 +125,46 @@
 
     <!-- RIGHT BOX: Chart with Chart.js -->
     <div class="chart-box">
-        <h3>Sales panoramic</h3>
+        <h3>Sales overview</h3>
 
         <div class="controls-box">
             <p>Click on a product on the left to see the last 14 days sales.</p>
         </div>
 
-        <!-- canvas:  -->
         <canvas id="salesChart"></canvas>
     </div>
 
 </div>
 
+<!-- Chart.js (required) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    // Global variable for the script. Chart.js is here saved.
+    // Global variable. Chart.js instance is stored here.
     let salesChart = null;
 
     // ---------------------------------------------------------
-    // Fx : ask data from backend and chart update
+    // Fx : fetch data from backend and update chart
     // ---------------------------------------------------------
     async function updateChart(productId) {
-        // 1) Call to FastAPI endpoint /chart-data
         const response = await fetch(`/chart-data?product_id=${productId}`);
-        // 2) Convert JSON answer from /chart-data to JS object. Takes the data needed for chart
         const data = await response.json();
 
-        // 3) get element by ID (canvas here)
         const ctx = document.getElementById('salesChart');
 
-        // 4) Creating the Chart (if not exists)
-        // Chart.js is a JS library. Two fundamental things:
-        // - type (line, bar, pie..)
-        // - data (what to draw)
         if (salesChart === null) {
-            // Chart line type
             salesChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    // x axe
                     labels: data.labels,
                     datasets: [{
-                        // Text for charts
                         label: `Sales (mock) - Product ${productId}`,
-                        // y axe
                         data: data.values,
-                        // Thickness line
                         borderWidth: 2
                     }]
                 }
             });
-        // 5) or updating the chart
         } else {
-            // Aggiorniamo il grafico esistente
             salesChart.data.labels = data.labels;
             salesChart.data.datasets[0].data = data.values;
             salesChart.data.datasets[0].label = `Sales (mock) - Product ${productId}`;
@@ -194,7 +173,7 @@
     }
 
     // ---------------------------------------------------------
-    // Fx : highlighs selected row
+    // Fx : highlights selected row
     // ---------------------------------------------------------
     function highlightSelectedRow(selectedRow) {
         const rows = document.querySelectorAll('.product-row');
@@ -206,36 +185,31 @@
     // Fx : connect click on rows with the chart
     // ---------------------------------------------------------
     function setupRowClickHandlers() {
-        // select all lines. The point (.) is used to search for class. In this case all elements that have class: product-row
         const rows = document.querySelectorAll('.product-row');
 
         rows.forEach(row => {
-            // for every row add a listener for "click" events
             row.addEventListener('click', (event) => {
-                // Checkbox doen't mean change graphic.
+                // Clicking the checkbox must not update the chart
                 if (event.target.tagName.toLowerCase() === 'input') {
                     return;
                 }
 
                 const productId = row.dataset.productId;
-                // Calling function for highliting
                 highlightSelectedRow(row);
-                // Calling function for update
                 updateChart(productId);
             });
         });
 
-        // If condition to have always a row selected (not super necessary)
+        // Auto-select first row (optional)
         if (rows.length > 0) {
             const firstRow = rows[0];
             highlightSelectedRow(firstRow);
-            const initialProductId = firstRow.dataset.productId;
-            updateChart(initialProductId);
+            updateChart(firstRow.dataset.productId);
         }
     }
 
     // ---------------------------------------------------------
-    // Fx : managing select all from checkbox
+    // Fx : managing select all checkbox
     // ---------------------------------------------------------
     function setupSelectAll() {
         const selectAllCheckbox = document.getElementById('selectAll');
@@ -261,8 +235,7 @@
             if (cb.checked) {
                 const row = cb.closest('.product-row');
                 if (row) {
-                    const id = row.dataset.productId;
-                    selectedIds.push(id);
+                    selectedIds.push(row.dataset.productId);
                 }
             }
         });
@@ -285,17 +258,13 @@
                 return;
             }
 
-            // Join IDs in a comma-separated string
             const query = encodeURIComponent(ids.join(","));
-
-            // Redirect to the new page /ai-suggestions
             window.location.href = `/ai-suggestions?ids=${query}`;
         });
     }
 
-
     // ---------------------------------------------------------
-    // Fx : main fx to prepare the dashboard
+    // Fx : main setup
     // ---------------------------------------------------------
     function setupDashboard() {
         setupRowClickHandlers();
@@ -303,16 +272,8 @@
         setupAISuggestionButton();
     }
 
-    // ---------------------------------------------------------
-    // ENTERING POINT: WHEN THE PAGE IS LOADED
-    // ---------------------------------------------------------
-    // addEventListener is a method for objects
+    // Entry point
     window.addEventListener("load", setupDashboard);
-    // - execute setupDashboard
-    // - activate clicks on the rows
-    // - select first product and show the chart
-    // - activate select all
 </script>
 
-</body>
-</html>
+{% endblock %}

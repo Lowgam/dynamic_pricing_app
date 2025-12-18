@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Admin dashboard</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+
+{% block content %}
+
 
 <h2>Admin dashboard</h2>
 
@@ -51,7 +49,19 @@
     <button type="submit">Sync change price events</button>
 </form>
 
-<!-- 3) AI train -->
+<!-- 3) Sync stock and velocity -->
+<form method="post" action="/admin/sync-inventory" style="display:inline;">
+  <button type="submit">Sync stock & velocity</button>
+</form>
+
+{% if request.query_params.get('sync_inventory') == 'ok' %}
+  <p style="margin-top:10px;">
+    ✅ Sync completato. Prodotti aggiornati: <b>{{ request.query_params.get('updated') }}</b>
+  </p>
+{% endif %}
+
+
+<!-- 4) AI train -->
 <hr>
 
 <h3>AI Trainer</h3>
@@ -62,5 +72,11 @@
   <button type="submit">🔁 Avvia training IA</button>
 </form>
 
-</body>
-</html>
+<!-- 5) Reset ai_current_weights, weights_snapshots, change_price_events -->
+
+
+<form method="post" action="/admin/reset" onsubmit="return confirm('RESET DB: sei sicuro?');">
+  <button type="submit">RESET DB</button>
+</form>
+
+{% endblock %}

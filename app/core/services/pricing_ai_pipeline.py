@@ -30,7 +30,7 @@ def simulate_new_prices_with_ai(products: List[Dict]) -> List[Dict]:
             base_price=p["price"],
             cost_price=p["cost_price"],
             stock=p["stock"],
-            sales_velocity= sales_velocity,
+            sales_velocity= p["sales_velocity_14d"],
             expiry_date_str=p["expiry_date"]
         )
 
@@ -72,7 +72,7 @@ def simulate_new_prices_with_ai(products: List[Dict]) -> List[Dict]:
             "final_price": final_price,
             "expiry_date": p.get("expiry_date"),
             "stock": p.get("stock"),
-            "sales_velocity": p.get("sales_velocity"),
+            "sales_velocity": p.get("sales_velocity_14d"),
         })
 
     return result

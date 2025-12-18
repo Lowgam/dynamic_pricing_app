@@ -24,7 +24,7 @@ def calculate_ai_coefficient(engined_price: float, features: Dict) -> Dict:
 
     # 3) Extracting features for explanations purposes
     stock = int(features.get("stock") or 0)
-    days_to_expire = int(features.get("days_to_expire") or 0)
+    days_to_expire = int(features.get("days_to_expiry") or 0)
     sales_velocity = float(features.get("sales_velocity") or 0.0)
     reason = []
 

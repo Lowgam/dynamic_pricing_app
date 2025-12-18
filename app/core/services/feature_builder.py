@@ -35,7 +35,7 @@ def build_features(product: Dict[str, Any], engined_price:float) -> Dict[str, An
         "stock": product.get("stock",0),
         "recent_sales": product.get("sales_last_7_day",0),
         # Compact way to write an if
-        "sales_velocity": (product.get("sales_velocity",0) / 7) if product.get("sales_last_7_day", 0) > 0 else 0,
+        "sales_velocity": product.get("sales_velocity_14d") or 0.0,
         "engined_price": engined_price,
     }
 

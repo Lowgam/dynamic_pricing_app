@@ -28,7 +28,7 @@ async def admin_train(lookback_days: int = Form(14)):
 
     # isinstance: py basic function. Controls the type of a variable
     if isinstance(result, dict):
-        examples_used = result.get("examples_used", 0)
+        examples_used = int(result.get("num_examples", 0) or 0 )
         snapshot_id = result.get("snapshot_id", "") or ""
 
     if examples_used == 0:

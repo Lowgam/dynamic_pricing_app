@@ -1,6 +1,7 @@
 from fastapi import FastAPI,Request
-from app.routes import products, pricing, ui, dashboard
-from app.routes.admin import admin, weights, sync, train
+from app.routes import products, pricing, dashboard
+from app.routes.debug import ui
+from app.routes.admin import admin, weights, events_sync, train, sv_sync, reset
 from fastapi.templating import Jinja2Templates
 
 # creation app, FastAPI() = constructor. Everything I am going to add is going to be attached to this object
@@ -55,11 +56,21 @@ app.include_router(admin.router)
 app.include_router(weights.router)
 
 # -------------------------------------------------------
-# Endpoint for /admin/sync
+# Endpoint for /admin/events_sync
 # -------------------------------------------------------
-app.include_router(sync.router)
+app.include_router(events_sync.router)
 
 # -------------------------------------------------------
 # Endpoint for /admin/train
 # -------------------------------------------------------
 app.include_router(train.router)
+
+# -------------------------------------------------------
+# Endpoint for /admin/sv_sync
+# -------------------------------------------------------
+app.include_router(sv_sync.router)
+
+# -------------------------------------------------------
+# Endpoint for /admin/reset
+# -------------------------------------------------------
+app.include_router(reset.router)

@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Dettaglio snapshot pesi – ID {{ snapshot.id }}</title>
+{% extends "base.html" %}
+{% block title %}AI_Weights_List{% endblock %}
+
+{% block content %}
+
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 20px;
         }
         h1, h2 {
@@ -57,8 +56,6 @@
             background: #fbeaea;
         }
     </style>
-</head>
-<body>
 
 <h1>
     Snapshot pesi – ID {{ snapshot.id }}
@@ -113,5 +110,4 @@
     {% endif %}
 </div>
 
-</body>
-</html>
+{% endblock %}

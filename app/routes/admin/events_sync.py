@@ -1,4 +1,4 @@
-# Module : sync.py
+# Module : events_sync.py
 # Purpose : Close events open from 7 days
 
 from fastapi import APIRouter
@@ -11,7 +11,7 @@ router = APIRouter()
 # FX: Close OPEN events if days >= 7
 # ---------------------------------------------------
 @router.post("/admin/sync")
-async def admin_sync(days: int = 7):
+async def admin_sync(days: int = 1):
     if days < 1:
         days = 1
 
@@ -31,7 +31,8 @@ async def admin_sync(days: int = 7):
             e.window_days = DATEDIFF(NOW(), e.changed_at),
             e.stock_at_close = p.stock,
             e.days_to_expiry_at_close = DATEDIFF(p.expiry_date, NOW()),
-            e.velocity_at_close = 0
+            e.velocity_at_close = p.sales_velocity_14d,
+            e.units_after = COALESCE(e.units_after, p.stock)
         WHERE e.status = 'OPEN'
           AND e.changed_at <= DATE_SUB(NOW(), INTERVAL %s DAY)
         """

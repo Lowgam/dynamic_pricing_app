@@ -199,6 +199,11 @@ def insert_change_price_event(
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
+        # 0) Read current stock
+        cursor.execute("SELECT stock FROM products WHERE id = %s", (product_id,))
+        row = cursor.fetchone()
+        units_before = int((row or {}).get("stock") or 0)
+
         # 1) Control : if there is an OPEN product with the same id, close it
         sql_search = """
             SELECT id, changed_at
@@ -222,13 +227,32 @@ def insert_change_price_event(
 
 
         # 2) Create new event
-        sql = """
+        sql_insert = """
         INSERT INTO change_price_events
-        (product_id, old_price, new_price, source, status, weights_snapshot_id)
-        VALUES (%s, %s, %s, %s, 'OPEN', %s)
+        (
+        product_id,
+        old_price,
+        new_price,
+        source,
+        status,
+        weights_snapshot_id,
+        units_before
+        )
+        VALUES (%s, %s, %s, %s, 'OPEN', %s, %s)
         """
 
-        cursor.execute(sql, (product_id, old_price, new_price, source, weights_snapshot_id))
+        cursor.execute(
+            sql_insert,
+            (
+                product_id,
+                old_price,
+                new_price,
+                source,
+                weights_snapshot_id,
+                units_before,
+            )
+        )
+
         conn.commit()
 
     finally:
