@@ -5,27 +5,33 @@
 
 <style>
   
-  p{
+  .welcome{
     display: flex;
     justify-content: center;
+    flex-direction: column;
+    padding: 10px;
+    text-align: center;
+    font-size: 1.2rem;
   }
 
-  #welcome{
-    text-align: center;
-  }
 </style>
 
-<h2>Automatic Pricer</h2>
+<div class="welcome">
+  <b>Welcome in Automatic Pricer! </b>
+  <br>This web app is designed to allow you to update products 
+  <br>on your e-commerce site automatically and intelligently.</div>
 
-<p id="welcome">Welcome in Automatic Pricer! <br> This web app is designed to allow you to update products <br> on your e-commerce site automatically and intelligently.</p>
+<div class="welcome">
+  <b>Dashboard:</b>
+  <br>Check your products and your sales.
+  <br>Choose the prices you want to change and go for it!
+</div>
 
-<p>
-  <a href="/dashboard"><button>Dashboard</button></a>
-</p>
-
-<p>
-  <a href="/admin"><button>Admin</button></a>
-</p>
+<div class="welcome">
+  <b>Admin:</b>
+  <br>Update the AI brain by closing events and starting training.
+  <br>Update your database with new data from your stock and sales velocity.
+</div>
 
 {% endblock %}
 

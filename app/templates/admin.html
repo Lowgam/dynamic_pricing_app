@@ -3,11 +3,42 @@
 
 {% block content %}
 
+<style>
+  h2{
+    text-align: center;
+  }
+
+  .admin-btn{
+    font-family: inherit;
+    padding: 5px;
+    width: 300px;
+  }
+
+  div{
+    display: flex;
+    margin-bottom: 15px;
+    justify-content: center;
+  }
+
+  #reset-btn{
+    width: auto;
+    transition: 
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease;
+  }
+
+  #reset-btn:hover {
+    background-color: rgb(155, 6, 6);
+    color: white;
+    transform: translateY(-1px);
+  }
+</style>
 
 <h2>Admin dashboard</h2>
 
 {% if request.query_params.get('sync') == 'ok' %}
-  <p><b>Sync completato.</b> Closed={{ request.query_params.get('closed') }} (days={{ request.query_params.get('days') }})</p>
+  <p><b>Sync completed.</b> Closed={{ request.query_params.get('closed') }} (days={{ request.query_params.get('days') }})</p>
 {% endif %}
 
 {% if request.query_params.get('train') %}
@@ -16,47 +47,52 @@
 
   <div style="padding:10px; border:1px solid #ccc; border-radius:8px; margin:12px 0;">
     {% if train_status == 'ok' %}
-      ✅ <b>Training completato</b>.
-      Esempi usati: <b>{{ request.query_params.get('examples', '0') }}</b>
+      ✅ <b>Training completed</b>.
+      Exampled used: <b>{{ request.query_params.get('examples', '0') }}</b>
       {% if request.query_params.get('snapshot') %}
         — Snapshot: <b>#{{ request.query_params.get('snapshot') }}</b>
       {% endif %}
 
     {% elif train_status == 'skipped' and msg == 'no_closed_events' %}
-      ⚠️ <b>Training saltato</b>: non ci sono eventi <b>CLOSED</b> con outcome disponibile.
-      (Fai prima un sync che chiuda eventi e assicurati che units_before/units_after siano valorizzati.)
+      ⚠️ <b>Training skipped</b>: there are no CLOSED events with available outcome.
+      (Please before trying again close price events. If doen't work again, units_before/after aren't available yet)
 
     {% elif train_status == 'error' %}
-      ❌ <b>Training fallito</b>. Controlla i log.
+      ❌ <b>Training failed</b>. Check logs.
 
     {% else %}
-      ℹ️ <b>Training</b>: stato = {{ train_status }}{% if msg %}, msg={{ msg }}{% endif %}
+      ℹ️ <b>Training</b>: status = {{ train_status }}{% if msg %}, msg={{ msg }}{% endif %}
     {% endif %}
   </div>
 {% endif %}
 
 
-
 <!-- 1) Link to weights -->
-<p>
+<div>
     <a href="/admin/weights">
-        <button>Manage AI weights</button>
+        <button class="admin-btn">Manage AI weights</button>
     </a>
-</p>
+</div>
 
-<!-- 2) Sync events -->
-<form method="post" action="/admin/sync">
-    <button type="submit">Sync change price events</button>
+<!-- 2) Sync stock and velocity -->
+<div>
+  <form method="post" action="/admin/sync-inventory" style="display:inline;">
+  <button type="submit" class="admin-btn">Sync stock & velocity</button>
 </form>
+</div>
 
-<!-- 3) Sync stock and velocity -->
-<form method="post" action="/admin/sync-inventory" style="display:inline;">
-  <button type="submit">Sync stock & velocity</button>
+<!-- 3) Sync events -->
+<div>
+  <form method="post" action="/admin/sync">
+    <button type="submit" class="admin-btn">Sync price events</button>
 </form>
+</div>
+
+
 
 {% if request.query_params.get('sync_inventory') == 'ok' %}
   <p style="margin-top:10px;">
-    ✅ Sync completato. Prodotti aggiornati: <b>{{ request.query_params.get('updated') }}</b>
+    ✅ Sync completed. Updated products: <b>{{ request.query_params.get('updated') }}</b>
   </p>
 {% endif %}
 
@@ -69,14 +105,14 @@
 <form action="/admin/train" method="post" style="display:inline-block;">
   <label for="lookback_days">Lookback days:</label>
   <input id="lookback_days" name="lookback_days" type="number" value="14" min="1" max="365">
-  <button type="submit">🔁 Avvia training IA</button>
+  <button type="submit" class="admin-btn">🔁 Avvia training IA</button>
 </form>
 
 <!-- 5) Reset ai_current_weights, weights_snapshots, change_price_events -->
 
 
 <form method="post" action="/admin/reset" onsubmit="return confirm('RESET DB: sei sicuro?');">
-  <button type="submit">RESET DB</button>
+  <button type="submit" class="admin-btn" id="reset-btn">RESET DB</button>
 </form>
 
 {% endblock %}

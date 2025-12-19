@@ -9,6 +9,7 @@
         }
         h1 {
             margin-bottom: 10px;
+            text-align: center;
         }
         h2 {
             margin-top: 25px;
@@ -20,7 +21,7 @@
             margin-top: 15px;
         }
         th, td {
-            border-bottom: 1px solid #226e3a;
+            border-bottom: 1px solid #2116b3;
             padding: 8px;
             text-align: left;
         }
@@ -41,13 +42,13 @@
             padding: 2px 6px;
             border-radius: 4px;
             background: #d1ffd1;
-            border: 1px solid #6bbb6b;
+            border: 1px solid #2116b3;
         }
         .current-row {
             background: #f0fff0;
         }
         .panel {
-            border: 1px solid #b61111;
+            border: 1px solid #000000;
             padding: 10px 12px;
             border-radius: 6px;
             background: #fafafa;
@@ -61,7 +62,7 @@
         }
 </style>
 
-<h1>📊 Admin – AI Weights Snapshots</h1>
+<h1>AI Weights Snapshots</h1>
 
 {% if request.query_params.get('rollback') == 'success' %}
     <div style="
@@ -77,7 +78,7 @@
 
 
 {# --- Pannello pesi correnti --- #}
-<h2>Pesi correnti IA</h2>
+<h2>AI current weights</h2>
 
 {% if current_weights %}
     <div class="panel">
@@ -100,9 +101,9 @@
 {% endif %}
 
 {# --- Tabella snapshot --- #}
-<h2>Storico snapshot pesi</h2>
+<h2>Weights snapshots history</h2>
 
-<p>Totale snapshot: {{ snapshots|length }}</p>
+<p>Total snapshots: {{ snapshots|length }}</p>
 
 <table>
     <thead>
@@ -113,8 +114,8 @@
         <th>w_mhd</th>
         <th>w_velocity</th>
         <th>w_base</th>
-        <th>Stato</th>
-        <th class="actions">Azioni</th>
+        <th>Status</th>
+        <th class="actions">Actions</th>
     </tr>
     </thead>
     <tbody>
@@ -128,19 +129,19 @@
             <td>{{ s.w_base }}</td>
             <td>
                 {% if s.is_current %}
-                    <span class="badge-current">✓ Corrente</span>
+                    <span class="badge-current">✓ Active</span>
                 {% else %}
                     -
                 {% endif %}
             </td>
             <td class="actions">
-                <a href="/admin/weights/{{ s.id }}">Dettagli</a>
+                <a href="/admin/weights/{{ s.id }}">Details</a>
                 <!-- Il rollback lo collegheremo dopo -->
             </td>
         </tr>
     {% else %}
         <tr>
-            <td colspan="8">Nessuno snapshot trovato.</td>
+            <td colspan="8">No snapshots found</td>
         </tr>
     {% endfor %}
     </tbody>

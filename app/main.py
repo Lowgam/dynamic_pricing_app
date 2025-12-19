@@ -3,11 +3,15 @@ from app.routes import products, pricing, dashboard
 from app.routes.debug import ui
 from app.routes.admin import admin, weights, events_sync, train, sv_sync, reset
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 
 # creation app, FastAPI() = constructor. Everything I am going to add is going to be attached to this object
 # In py I can create variables without specifying the nature. In this case we take an object from FastAPI library
 app = FastAPI()
 template = Jinja2Templates(directory="app/templates")
+
+# FastAPI needs to mount static files like css.
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # decorator. Goes before the function. Is used to modify a function before is activation.
 # In this case FastAPI use a decorator to associate a function to an endpoint (server's address that answers clients requests)

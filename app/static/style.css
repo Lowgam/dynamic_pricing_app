@@ -1,15 +1,113 @@
+/* BASE */
+:root {
+  --primary: #d5d6ce;
+  --bg: #f5f1de;
+  --card: #ffffff;
+  --text: #000000;
+  --muted: #6b7280;
+  --border: #000000;
+  --accent: #e5533d;
+}
+
+html,body {
+  height: 100%;
+}
+
 body {
-  font-family: "Courier New", monospace;
-  background-color: #1b3f93;
-}
-.nav-bar {
-  margin-bottom: 15px;
-}
-
-.nav-bar button,
-.nav-bar a {
+  margin: 20px;
   display: flex;
-  margin-right: 8px;
-  justify-content: center;
+  flex-direction: column;
+  font-family: "Courier New", monospace;
+  background: var(--bg);
+  color: var(--text);
 }
 
+main {
+  flex: 1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+
+/* NAV BAR */
+.nav-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+}
+
+.nav-left {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.nav-right {
+  display: flex;
+  gap: 8px;
+}
+
+.btn, .nav-left {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text);
+  background: transparent;
+  transition: 
+  background-color 0.2s ease,
+  color 0.2s ease,
+  transform 0.15s ease;
+}
+
+.btn:hover, .nav-left:hover {
+  background-color: rgb(48, 48, 200);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.nav-logo{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.nav-logo img {
+  width: 40vw;       
+  max-width: 600px;  
+  min-width: 100px;   
+  height: auto;
+  display: block;
+}
+
+
+/* FOOTER */
+.footer {
+  margin-top: 40px;
+  padding: 12px 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+
+/* AUTOMATIONS */
+@media (max-width: 700px) {
+  .nav-logo {
+    display: none;
+  }
+}

@@ -9,8 +9,12 @@
 <body>
 
   {% include "partials/nav_bar.html" %}
+  
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
 
-  {% block content %}{% endblock %}
+  {% include "partials/footer.html" %}
 
 </body>
 </html>

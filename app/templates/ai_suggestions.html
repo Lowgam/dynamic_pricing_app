@@ -5,13 +5,10 @@
 
 
     <style>
-        body {
-            margin: 20px;
-            background-color: #f5f5f5;
-        }
 
         h2 {
             margin-bottom: 20px;
+            text-align: center;
         }
 
         table {
@@ -33,6 +30,11 @@
         .back-link {
             margin-top: 15px;
             display: inline-block;
+        }
+
+        #confirm-btn{
+            font-family: inherit;
+            margin-top: 15px;
         }
     </style>
 
@@ -126,7 +128,7 @@
      to /apply. Here is where the magic happens. -->
 <form method="post" action="/ai-suggestions/apply">
   <input type="hidden" name="ids" value="{{ ids }}">
-  <button type="submit">Conferma / Applica prezzi</button>
+  <button type="submit" id="confirm-btn">Confirm / Apply prices</button>
 </form>
 
 

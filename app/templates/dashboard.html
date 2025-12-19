@@ -4,13 +4,16 @@
 {% block content %}
 
 <style>
-    body {
-        margin: 20px;
-        background-color: #83b48c;
-    }
 
     h2 {
         margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .items-dashboard{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     .container {
@@ -82,8 +85,16 @@
         font-size: 0.9rem;
         color: #666;
     }
-</style>
 
+    #aiSuggestionBtn{
+        align-items: center;
+        padding: 5px;   
+        display: block;
+        margin: 15px auto 0 auto;
+        font-family: inherit;
+    }
+</style>
+<div class="items-dashboard">
 <h2>Products dashboard</h2>
 
 <div class="container">
@@ -119,7 +130,7 @@
 
         <!-- Button to trigger AI suggestions for selected products -->
         <button type="button" id="aiSuggestionBtn">
-            AI Suggestion for selected products
+            AI suggestions
         </button>
     </div>
 
@@ -135,6 +146,8 @@
     </div>
 
 </div>
+</div>
+
 
 <!-- Chart.js (required) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

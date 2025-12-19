@@ -20,6 +20,7 @@
         }
         table {
             border-collapse: collapse;
+            background-color: rgb(255, 255, 255);
             margin-top: 10px;
             margin-bottom: 20px;
         }
@@ -58,23 +59,23 @@
     </style>
 
 <h1>
-    Snapshot pesi – ID {{ snapshot.id }}
+    Snapshot weights – ID {{ snapshot.id }}
     {% if is_current %}
-        <span class="badge-current">✓ Corrente</span>
+        <span class="badge-current">✓ Active</span>
     {% endif %}
 </h1>
 
-<p>Creato il: <strong>{{ snapshot.created_at }}</strong></p>
+<p>Created on: <strong>{{ snapshot.created_at }}</strong></p>
 
-<h2>Confronto pesi</h2>
+<h2>Weights comparison</h2>
 
 {% if current_weights %}
 <table>
     <thead>
     <tr>
-        <th>Peso</th>
+        <th>Weight</th>
         <th>Snapshot</th>
-        <th>Corrente</th>
+        <th>Current</th>
     </tr>
     </thead>
     <tbody>
@@ -91,18 +92,18 @@
     </tbody>
 </table>
 {% else %}
-<p><em>Nessun peso corrente trovato (tabella ai_current_weights vuota?). Il confronto non è disponibile.</em></p>
+<p><em>No current weights found (empty tab ai_current_weights?). Comparison not available.</em></p>
 {% endif %}
 
 <div class="buttons">
-    <a href="/admin/weights">⬅ Torna alla lista snapshot</a>
+    <a href="/admin/weights">⬅ Back to snapshot list</a>
 
     {% if not is_current %}
     <form method="post" action="/admin/weights/{{ snapshot.id }}/rollback"
           style="display:inline;"
-          onsubmit="return confirm('Sei sicuro di voler fare rollback a questo snapshot?');">
+          onsubmit="return confirm('Do you really want to rollback to this snapshot?');">
         <button type="submit" class="rollback">
-            🔄 Rollback a questo snapshot
+            🔄 Rollback to this snapshot
         </button>
     </form>
     {% else %}
