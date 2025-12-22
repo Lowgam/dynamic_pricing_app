@@ -9,8 +9,10 @@ from typing import List
 from starlette.responses import RedirectResponse
 
 from app.core.services.chart_data_builder import build_chart_data
+from app.core.utils import days_to_expiry
 from app.database.queries import get_products_by_ids, get_all_products, update_product, insert_change_price_event
 from app.core.services.pricing_ai_pipeline import simulate_new_prices_with_ai
+from app.forecasting.forecasting_pipeline import build_sellout_forecast
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -55,6 +57,27 @@ async def ai_suggestions(request: Request, ids: str= ""):
         products = get_products_by_ids(selected_ids)
 
     suggestion = simulate_new_prices_with_ai(products)
+
+    for p in suggestion:
+        dte = days_to_expiry(p.get("expiry_date"))
+
+        stock = p.get("stock")
+        velocity_now = p.get("sales_velocity")
+        old_price = float(p.get("base_price"))
+        new_price = float(p.get("final_price"))
+
+        print("DEBUG", p.get("id"), "stock=", p.get("stock"), "velocity=", p.get("velocity_14d"),
+              p.get("sales_velocity_14d"), p.get("sales_velocity"))
+
+        forecast = build_sellout_forecast(
+            stock=stock,
+            velocity_now=velocity_now,
+            days_to_expiry=dte,
+            old_price=old_price,
+            new_price=new_price,
+        )
+
+        p.update(forecast)
 
     return templates.TemplateResponse(
         "ai_suggestions.html",

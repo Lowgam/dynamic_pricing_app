@@ -47,14 +47,18 @@
             <th>ID</th>
             <th>SKU</th>
             <th>Product name</th>
-            <th>Category</th>
-            <th>Base price (€)</th>
-            <th>Engined price (€)</th>
+            <!-- <th>Category</th> -->
+            <th>Actual price (€)</th>
+            <th>Sell-out now</th>
+            <th>Overshoot now</th>
+            <!-- <th>Engined price (€)</th> -->
             <th>Coeff. AI</th>
             <th>Final price (€)</th>
+            <th>Sell-out after</th>
+            <th>Overshoot after</th>
             <th>Expiry</th>
-            <th>Stock</th>
-            <th>Velocity (14d)</th>
+            <!-- <th>Stock</th> -->
+            <!-- <th>Velocity (14d)</th> -->
         </tr>
     </thead>
     <tbody>
@@ -70,7 +74,7 @@
         <td>{{ p.name }}</td>
 
         <!-- Category -->
-        <td>{{ p.Category }}</td>
+        <!-- <td>{{ p.Category }}</td> -->
 
         <!-- Current price -->
         <td>
@@ -81,14 +85,32 @@
             {% endif %}
         </td>
 
-        <!-- Engine price -->
+        <!-- Sell-out NOW -->
         <td>
+            {% if p.days_to_sellout_now is defined and p.days_to_sellout_now is not none %}
+                {{ p.days_to_sellout_now | round(1) }} d
+            {% else %}
+                -
+            {% endif %}
+        </td>
+
+        <!-- Overshoot NOW -->
+        <td>
+            {% if p.overshoot_now is defined and p.overshoot_now is not none%}
+                {{ p.overshoot_now | round(1) }} d
+            {% else %}
+                -
+            {% endif %}
+        </td>
+
+        <!-- Engine price -->
+        <!-- <td>
             {% if p.engined_price is not none %}
                 {{ "%.2f"|format(p.engined_price) }}
             {% else %}
                 -
             {% endif %}
-        </td>
+        </td> -->
 
         <!-- AI coeff -->
         <td>
@@ -108,14 +130,32 @@
             {% endif %}
         </td>
 
+        <!-- Sell-out AI -->
+        <td>
+            {% if p.days_to_sellout_ai is defined and p.days_to_sellout_ai is not none%}
+                {{ p.days_to_sellout_ai | round(1) }} d
+            {% else %}
+                -
+            {% endif %}
+        </td>
+
+        <!-- Overshoot AI -->
+        <td>
+            {% if p.overshoot_ai is defined and p.overshoot_ai is not none%}
+                {{ p.overshoot_ai | round(1) }} d
+            {% else %}
+                -
+            {% endif %}
+        </td>
+
         <!-- Expiry -->
         <td> {{ p.expiry_date }}</td>
 
         <!-- Stock -->
-        <td> {{ p.stock }} </td>
+        <!-- <td> {{ p.stock }} </td> -->
 
         <!-- Velocity 14d -->
-         <td> {{ p.sales_velocity }}</td>
+        <!-- <td> {{ p.sales_velocity }}</td> -->
 
     </tr>
     {% endfor %}
