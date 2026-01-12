@@ -56,7 +56,8 @@ def sync_inventory_and_velocity(product_ids: List[int] | None = None) -> int:
             update_sql = """
             UPDATE products
             SET stock = %s,
-            sales_velocity_14d = %s
+            sales_velocity_14d = %s,
+            status = %s
             WHERE id = %s
             """
 
@@ -65,6 +66,7 @@ def sync_inventory_and_velocity(product_ids: List[int] | None = None) -> int:
                 (
                     data["stock"],
                     data["sales_velocity"],
+                    data["status"],
                     p["id"],
                 ),
             )

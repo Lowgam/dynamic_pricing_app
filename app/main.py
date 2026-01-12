@@ -1,7 +1,7 @@
 from fastapi import FastAPI,Request
 from app.routes import products, pricing, dashboard
 from app.routes.debug import ui
-from app.routes.admin import admin, weights, events_sync, train, sv_sync, reset
+from app.routes.admin import admin, weights, events_sync, train, sv_sync, reset, import_missing_products, clear_products
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
@@ -78,3 +78,13 @@ app.include_router(sv_sync.router)
 # Endpoint for /admin/reset
 # -------------------------------------------------------
 app.include_router(reset.router)
+
+# -------------------------------------------------------
+# Endpoint for /admin/import-missing
+# -------------------------------------------------------
+app.include_router(import_missing_products.router)
+
+# -------------------------------------------------------
+# Endpoint for /admin/clear-products
+# -------------------------------------------------------
+app.include_router(clear_products.router)

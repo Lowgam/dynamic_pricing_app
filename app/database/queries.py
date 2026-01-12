@@ -3,7 +3,7 @@
 
 from .db import get_connection, get_dict_cursor
 from mysql.connector import Error
-from typing import List, Optional
+from typing import List, Optional, Set
 
 # ---------------------------------------------------
 # Fx: get all products from DB
@@ -14,7 +14,7 @@ def get_all_products():
         # Object used in an open SQL session to send commands and receive results. If conn is the door, cursor is the conversation.
         # In this case we use a cursor created in db.py, that is able to return dict
         cursor = get_dict_cursor(conn)
-        query = "SELECT * FROM products"
+        query = "SELECT * FROM products WHERE status = 'active'"
         cursor.execute(query)
         # fetchall() = give me all the results you found. rows become a tuple list
         rows = cursor.fetchall()
@@ -58,18 +58,19 @@ def insert_product(product: dict):
         cursor = conn.cursor()
         # """ Allow us to use more lines for a str
         # Here placeholders are created
-        sql_insert = """INSERT INTO products (shopify_id, sku, name, price, stock, category, expiry_date)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+        sql_insert = """INSERT INTO products (shopify_id, sku, name, price, stock, category, expiry_date, sales_velocity_14d)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
         # product is a dict, we are preparing how we want the values of real products to be passed to our function curso.execute
         # Here we use tuple (unchangeable)
         values = (
-            product["shopify_id"],
-            product["sku"],
-            product["name"],
-            product["price"],
-            product["stock"],
-            product["category"],
-            product["expiry_date"],
+            product.get("shopify_id"),
+            product.get("sku"),
+            product.get("name"),
+            product.get("price"),
+            product.get("stock"),
+            product.get("category"),
+            product.get("expiry_date"),
+            product.get("sales_velocity_14d"),
         )
         cursor.execute(sql_insert, values)
         # commit necessary when we modify the DB. The other queries I wrote earlier (SELECT) just wanted to fetch some datas
@@ -147,10 +148,6 @@ def get_products_by_ids(ids: List[int]):
             cursor.close()
         if conn:
             conn.close()
-
-# ---------------------------------------------------
-# ------------------- TESTING -----------------------
-# ---------------------------------------------------
 
 # ---------------------------------------------------
 # Test for successful SELECT
@@ -254,6 +251,60 @@ def insert_change_price_event(
         )
 
         conn.commit()
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+# ---------------------------------------------------
+# Fx: get existing products from DB
+# ---------------------------------------------------
+def get_existing_product_id() -> Set[int]:
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        sql = """
+        SELECT shopify_id 
+        FROM products
+        WHERE shopify_id IS NOT NULL
+        """
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        return {int(r[0]) for r in rows if r and r[0] is not None}
+
+    except Error as e:
+        print(f"Error during query get_existing_product_id: {e}")
+        return set()
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+# ---------------------------------------------------
+# Fx: clear products table
+# ---------------------------------------------------
+def clear_products_table() -> int:
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM products")
+        cursor.execute("ALTER TABLE products AUTO_INCREMENT = 1")
+        deleted = cursor.rowcount
+
+        conn.commit()
+        return deleted
 
     finally:
         if cursor:

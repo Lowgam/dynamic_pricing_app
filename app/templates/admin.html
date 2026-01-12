@@ -22,6 +22,8 @@
 
   #reset-btn{
     width: auto;
+    margin-top: 5px;
+    width: 200px;
     transition: 
     background-color 0.2s ease,
     color 0.2s ease,
@@ -37,10 +39,27 @@
 
 <h2>Admin dashboard</h2>
 
-{% if request.query_params.get('sync') == 'ok' %}
-  <p><b>Sync completed.</b> Closed={{ request.query_params.get('closed') }} (days={{ request.query_params.get('days') }})</p>
+<!-- CLEARED PRODUCTS -->
+{% if request.query_params.get("products_cleared") %}
+  <div class="alert alert-warning">
+    Products table cleared: {{ request.query_params.get("products_cleared") }}
+  </div>
 {% endif %}
 
+<!-- MISSING PRODUCTS IN SHOPIFY -->
+{% if missing_products and missing_products > 0 %}
+  <div class="alert alert-warning">
+    New active products available on Shopify: {{ missing_products }}
+  </div>
+{% endif %}
+
+
+<!-- EVENTS -->
+{% if request.query_params.get('sync') == 'ok' %}
+  <div><b>Sync completed.</b> Closed={{ request.query_params.get('closed') }} (days={{ request.query_params.get('days') }})</div>
+{% endif %}
+
+<!-- AI TRAINING -->
 {% if request.query_params.get('train') %}
   {% set train_status = request.query_params.get('train') %}
   {% set msg = request.query_params.get('msg') %}
@@ -66,6 +85,21 @@
   </div>
 {% endif %}
 
+<!-- IMPORT NEW PRODUCTS -->
+{% if request.query_params.get("imported") %}
+  <div class="alert alert-success">
+    Success, products imported: <b>{{ request.query_params.get("imported") }}</b>
+  </div>
+{% endif %}
+
+<!-- UPDATE PRODUCTS -->
+{% if request.query_params.get('sync_inventory') == 'ok' %}
+  <div>
+    Database Synchronised. Updated products: <b>{{ request.query_params.get('updated') }}</b>
+  </div>
+{% endif %}
+
+
 
 <!-- 1) Link to weights -->
 <div>
@@ -74,30 +108,31 @@
     </a>
 </div>
 
-<!-- 2) Sync stock and velocity -->
+<!-- 2) Import new products -->
+<div>
+  <form action="/admin/import-missing" method="post" style="display:inline;">
+  <button type="submit" class="admin-btn">
+    Import new products
+  </button>
+</form>
+
+</div>
+
+<!-- 3) Sync stock and velocity -->
 <div>
   <form method="post" action="/admin/sync-inventory" style="display:inline;">
-  <button type="submit" class="admin-btn">Sync stock & velocity</button>
+  <button type="submit" class="admin-btn">Update products</button>
 </form>
 </div>
 
-<!-- 3) Sync events -->
+<!-- 4) Sync events -->
 <div>
   <form method="post" action="/admin/sync">
     <button type="submit" class="admin-btn">Sync price events</button>
 </form>
 </div>
 
-
-
-{% if request.query_params.get('sync_inventory') == 'ok' %}
-  <p style="margin-top:10px;">
-    ✅ Sync completed. Updated products: <b>{{ request.query_params.get('updated') }}</b>
-  </p>
-{% endif %}
-
-
-<!-- 4) AI train -->
+<!-- 5) AI train -->
 <hr>
 
 <h3>AI Trainer</h3>
@@ -105,14 +140,24 @@
 <form action="/admin/train" method="post" style="display:inline-block;">
   <label for="lookback_days">Lookback days:</label>
   <input id="lookback_days" name="lookback_days" type="number" value="14" min="1" max="365">
-  <button type="submit" class="admin-btn">🔁 Avvia training IA</button>
+  <button type="submit" class="admin-btn">Start AI training</button>
 </form>
 
 <!-- 5) Reset ai_current_weights, weights_snapshots, change_price_events -->
 
 
 <form method="post" action="/admin/reset" onsubmit="return confirm('RESET DB: sei sicuro?');">
-  <button type="submit" class="admin-btn" id="reset-btn">RESET DB</button>
+  <button type="submit" class="admin-btn" id="reset-btn">RESET Events & Weights</button>
 </form>
+
+<!-- 6) Clear products table (DEV only) -->
+
+<form method="post" action="/admin/clear-products"
+      onsubmit="return confirm('CLEAR PRODUCTS: this will delete ALL products. Are you sure?');">
+  <button type="submit" class="admin-btn" id="reset-btn">
+    EMPTY Products
+  </button>
+</form>
+
 
 {% endblock %}
