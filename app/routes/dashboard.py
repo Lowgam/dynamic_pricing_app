@@ -1,7 +1,7 @@
 # Module : dashboard.py
 # Purpose : Creation dashboard endpoint
 
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
 from typing import List
@@ -13,8 +13,11 @@ from app.core.utils import days_to_expiry
 from app.database.queries import get_products_by_ids, get_all_products, update_product, insert_change_price_event
 from app.core.services.pricing_ai_pipeline import simulate_new_prices_with_ai
 from app.forecasting.forecasting_pipeline import build_sellout_forecast
+from app.core.utils.auth_guard import require_login
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(require_login)]
+)
 templates = Jinja2Templates(directory="app/templates")
 
 # ---------------------------------------------------

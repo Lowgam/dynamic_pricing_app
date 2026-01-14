@@ -1,12 +1,15 @@
 # Module: admin_reset.py
 # Purpose: DB reset (tests cleanup + neutral baseline)
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 from app.database.db import get_connection
 from app.core.utils.logger import ai_logger
+from app.core.utils.auth_guard import require_login
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(require_login)]
+)
 
 def _column_exists(cursor, table: str, column: str) -> bool:
     cursor.execute(

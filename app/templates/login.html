@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}AI_Weights_List{% endblock %}
+
+{% block content %}
+
+<h2>Login</h2>
+
+<form method="post" action="/login">
+  <div>
+    <input
+      type="text"
+      name="username"
+      placeholder="Username"
+      required
+    />
+  </div>
+
+  <div>
+    <input
+      type="password"
+      name="password"
+      placeholder="Password"
+      required
+    />
+  </div>
+
+  <button type="submit">Login</button>
+</form>
+
+{% if request.query_params.get("error") %}
+  <p style="color:red;">Invalid credentials</p>
+{% endif %}
+
+{% endblock %}

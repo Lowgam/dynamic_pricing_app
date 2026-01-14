@@ -311,3 +311,31 @@ def clear_products_table() -> int:
             cursor.close()
         if conn:
             conn.close()
+
+# ---------------------------------------------------
+# Fx: get user by name
+# ---------------------------------------------------
+def get_user_by_username(username: str):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        sql = """
+        SELECT id, username, password_hash, role
+        FROM users
+        WHERE username = %s AND is_active = 1
+        """
+        cursor.execute(sql, (username,))
+        return cursor.fetchone()
+
+    except Error as e:
+        print(f"Error during query get_user_by_name: {e}")
+        return None
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()

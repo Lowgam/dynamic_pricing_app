@@ -1,13 +1,26 @@
 from fastapi import FastAPI,Request
-from app.routes import products, pricing, dashboard
-from app.routes.debug import ui
-from app.routes.admin import admin, weights, events_sync, train, sv_sync, reset, import_missing_products, clear_products
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
+
+from app.routes import products, pricing, dashboard, auth
+from app.routes.debug import ui
+from app.routes.admin import admin, weights, events_sync, train, sv_sync, reset, import_missing_products, clear_products
+
 
 # creation app, FastAPI() = constructor. Everything I am going to add is going to be attached to this object
 # In py I can create variables without specifying the nature. In this case we take an object from FastAPI library
 app = FastAPI()
+
+# Allows FastAPI to have a session for every user, through saving cookies for every user
+# We need it here to do not ask password at every page.
+# A cookie is a small text file that the server ask the browser to keep. It is needed because HTTP has no memory.
+# The server doesn't know you are the same user. With cookies the server recognise browser and saved info.
+# A cookie is signed with a secret_key to verify it.
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="CHANGE_ME_SECRET_KEY",
+)
 template = Jinja2Templates(directory="app/templates")
 
 # FastAPI needs to mount static files like css.
@@ -32,17 +45,17 @@ def home(Request: Request):
 # -------------------------------------------------------
 # Endpoint /products or /products-ui
 # -------------------------------------------------------
-app.include_router(products.router)
+#app.include_router(products.router)
 
 # -------------------------------------------------------
 # Endpoint for JSON
 # -------------------------------------------------------
-app.include_router(pricing.router)
+#app.include_router(pricing.router)
 
 # -------------------------------------------------------
 # Endpoint for UI
 # -------------------------------------------------------
-app.include_router(ui.router)
+#app.include_router(ui.router)
 
 # -------------------------------------------------------
 # Endpoint for /dashboard
@@ -88,3 +101,8 @@ app.include_router(import_missing_products.router)
 # Endpoint for /admin/clear-products
 # -------------------------------------------------------
 app.include_router(clear_products.router)
+
+# -------------------------------------------------------
+# Endpoint for /login
+# -------------------------------------------------------
+app.include_router(auth.router)

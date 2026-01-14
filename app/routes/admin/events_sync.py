@@ -1,11 +1,14 @@
 # Module : events_sync.py
 # Purpose : Close events open from 7 days
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import  RedirectResponse
 from app.database.db import get_connection
+from app.core.utils.auth_guard import require_login
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(require_login)]
+)
 
 # ---------------------------------------------------
 # FX: Close OPEN events if days >= 7

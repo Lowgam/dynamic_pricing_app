@@ -1,7 +1,7 @@
 # Module : weights.py
 # Purpose : admin endpoints for inspecting AI weight snapshots
 
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -11,8 +11,11 @@ from app.database.learning_store import (
     rollback_weights
 )
 from app.core.utils import ai_logger
+from app.core.utils.auth_guard import require_login
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(require_login)]
+)
 templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/admin/weights")

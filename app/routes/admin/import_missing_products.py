@@ -2,14 +2,16 @@
 # Purpose : create endpoint for admin to import missing products.
 
 import json
-from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends
 from starlette.responses import RedirectResponse
 
 from app.adapters.shopify.mapper import map_shopify_product_to_db
 from app.core.services.product_importer import import_missing_products
+from app.core.utils.auth_guard import require_login
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(require_login)]
+)
 
 @router.post("/admin/import-missing")
 def admin_import_missing_products():

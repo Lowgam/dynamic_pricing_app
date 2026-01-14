@@ -1,13 +1,16 @@
 # Module : clear_products.py
 # Purpose : clear products table (local DB only)
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 
 from app.database.queries import clear_products_table
 from app.core.utils import ai_logger
+from app.core.utils.auth_guard import require_login
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(require_login)]
+)
 
 @router.post("/admin/clear-products")
 def admin_clear_products():

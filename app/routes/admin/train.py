@@ -1,13 +1,16 @@
 # Module : train.py
 # Purpose : endpoint for admin to start training sessions
 
-from fastapi import APIRouter, Form
+from fastapi import APIRouter, Form, Depends
 from fastapi.responses import RedirectResponse
 
 from app.core.services import train_once
 from app.core.utils import ai_logger
+from app.core.utils.auth_guard import require_login
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(require_login)]
+)
 
 @router.post("/admin/train")
 async def admin_train(lookback_days: int = Form(14)):
