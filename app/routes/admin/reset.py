@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 from app.database.db import get_connection
 from app.core.utils.logger import ai_logger
-from app.core.utils.auth_guard import require_login
+from app.core.utils.auth_guard import require_login, require_role
 
 router = APIRouter(
     dependencies=[Depends(require_login)]
@@ -25,7 +25,7 @@ def _column_exists(cursor, table: str, column: str) -> bool:
     return cursor.fetchone()[0] > 0
 
 
-@router.post("/admin/reset")
+@router.post("/admin/reset", dependencies=[Depends(require_role("dev"))])
 async def admin_reset():
     conn = None
     cursor = None

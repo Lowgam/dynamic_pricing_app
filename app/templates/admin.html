@@ -35,6 +35,32 @@
     color: white;
     transform: translateY(-1px);
   }
+
+  .users-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.users-table th,
+.users-table td {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.users-table th {
+  background: #eee;
+}
+
+.users-table tr:nth-child(even) {
+  background: #fafafa;
+}
+
+td {
+  background-color: white;
+}
+
 </style>
 
 <h2>Admin dashboard</h2>
@@ -85,6 +111,15 @@
   </div>
 {% endif %}
 
+<!-- DO I HAVE TO SYNC EVENTS? -->
+{% if events_to_sync %}
+  <div class="warning-banner">
+    There are price change events open for more than 7 days.  
+    Please run 'Sync price events'.
+  </div>
+{% endif %}
+
+
 <!-- IMPORT NEW PRODUCTS -->
 {% if request.query_params.get("imported") %}
   <div class="alert alert-success">
@@ -132,8 +167,9 @@
 </form>
 </div>
 
-<!-- 5) AI train -->
 <hr>
+
+<!-- 5) AI train -->
 
 <h3>AI Trainer</h3>
 
@@ -143,14 +179,88 @@
   <button type="submit" class="admin-btn">Start AI training</button>
 </form>
 
-<!-- 5) Reset ai_current_weights, weights_snapshots, change_price_events -->
+<hr>
+
+<!-- 6) Create user -->
+<h3>Create new user</h3>
+
+{% if request.query_params.get("user_created") %}
+  <p style="color: green;">User created successfully</p>
+{% endif %}
+
+
+<form method="post" action="/admin/users/create">
+  <div>
+    <input
+      type="text"
+      name="username"
+      placeholder="Username"
+      required
+    />
+  </div>
+
+  <div>
+    <input
+      type="password"
+      name="password"
+      placeholder="Password"
+      required
+    />
+  </div>
+
+  <div>
+    <select name="role">
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+    </select>
+  </div>
+
+  <button type="submit" class="admin-btn">Create user</button>
+</form>
+
+<hr>
+
+<!-- 7) USER Tab -->
+<h3>Users</h3>
+
+<table class="users-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Username</th>
+      <th>Role</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.role }}</td>
+        <td>
+          <form method="post" action="/admin/users/delete" style="display:inline;">
+            <input type="hidden" name="user_id" value="{{ user.id }}">
+            <button type="submit" class="btn">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr>
+
+<!-- 8) Reset ai_current_weights, weights_snapshots, change_price_events -->
+{% if request.session.get("role") == "dev" %}
+ <h3>Reset section</h3>
 
 
 <form method="post" action="/admin/reset" onsubmit="return confirm('RESET DB: sei sicuro?');">
   <button type="submit" class="admin-btn" id="reset-btn">RESET Events & Weights</button>
 </form>
 
-<!-- 6) Clear products table (DEV only) -->
+<!-- 9) Clear products table (DEV only) -->
 
 <form method="post" action="/admin/clear-products"
       onsubmit="return confirm('CLEAR PRODUCTS: this will delete ALL products. Are you sure?');">
@@ -158,6 +268,7 @@
     EMPTY Products
   </button>
 </form>
+{% endif %}
 
 
 {% endblock %}

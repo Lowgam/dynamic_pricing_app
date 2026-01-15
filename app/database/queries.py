@@ -339,3 +339,117 @@ def get_user_by_username(username: str):
             cursor.close()
         if conn:
             conn.close()
+
+# ---------------------------------------------------
+# Fx: create user
+# ---------------------------------------------------
+def create_user(username: str, password_hash: str, role: str = "user"):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        print(">>> CONNECTION DONE")
+
+        sql = """
+        INSERT INTO users (username, password_hash, role)
+        VALUES (%s, %s, %s)
+        """
+
+        print(">>> CREATE USER QUERY START")
+        cursor.execute(sql, (username, password_hash, role))
+        print(">>> CREATE USER QUERY EXECUTED")
+        conn.commit()
+        print(">>> CREATE USER COMMITTED")
+
+    except Error as e:
+        print(f"Error during query create_user: {e}")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+# ---------------------------------------------------
+# Fx: delete user
+# ---------------------------------------------------
+def delete_user_by_id(user_id: int):
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        sql = """
+        DELETE FROM users WHERE id = %s
+        """
+        cursor.execute(sql, (user_id,))
+        conn.commit()
+
+    except Error as e:
+        print(f"Error during query delete_user_by_id: {e}")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+# ---------------------------------------------------
+# Fx: get all users
+# ---------------------------------------------------
+def get_all_users():
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        sql = """
+        SELECT id, username, role
+        FROM users
+        ORDER BY id
+        """
+        cursor.execute(sql)
+
+        return cursor.fetchall()
+
+    except Error as e:
+        print(f"Error during query get_all_users: {e}")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+# ---------------------------------------------------
+# Fx: get all users
+# ---------------------------------------------------
+def has_stale_change_price_events(days: int = 7) -> bool:
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        sql = """ 
+        SELECT COUNT(*) 
+        FROM change_price_events
+        WHERE status = 'OPEN'
+        AND changed_at < NOW() - INTERVAL %s DAY
+        """
+        cursor.execute(sql, (days,))
+        count = cursor.fetchone()[0]
+
+        return count > 0
+
+    except Error as e:
+        print(f"Error during query has_stale_change_price_events: {e}")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()

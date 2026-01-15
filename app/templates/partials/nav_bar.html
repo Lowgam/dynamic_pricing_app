@@ -3,8 +3,12 @@
   <a href="/" class="nav-logo"><img src="/static/logo.png" alt="Automatic Pricer"></a>
 
   <div class="nav-right">
+    {% if request.session.get("user_id") %}
     <a href="/dashboard" class="btn">Dashboard</a>
+    {% endif %}
+    {% if request.session.get("role") in ["admin", "dev"] %}
     <a href="/admin" class="btn">Admin</a>
+    {% endif %}
 
     {% if request.session.get("user_id") %}
       <a href="/logout" class="btn">Logout</a>
