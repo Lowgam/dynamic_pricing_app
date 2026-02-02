@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if ok %}
+    <h1>Shopify OAuth OK ✅</h1>
+  {% else %}
+    <h1>Shopify OAuth FAIL ❌</h1>
+  {% endif %}
+
+  <p>{{ message }}</p>
+
+  <h3>Data</h3>
+  <pre>{{ data }}</pre>
+
+  <p><a href="/admin">Back to Admin</a></p>
+{% endblock %}

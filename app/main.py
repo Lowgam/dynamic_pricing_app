@@ -3,14 +3,16 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routes import products, pricing, dashboard, auth
-from app.routes.debug import ui
-from app.routes.admin import admin, weights, events_sync, train, sv_sync, reset, import_missing_products, clear_products
-
+from app.routes import dashboard, auth, shopify_oauth
+from app.routes.admin import admin, weights, events_sync, train, sv_sync, reset, import_missing_products, clear_products, auth_shopify
+from dotenv import load_dotenv
 
 # creation app, FastAPI() = constructor. Everything I am going to add is going to be attached to this object
 # In py I can create variables without specifying the nature. In this case we take an object from FastAPI library
 app = FastAPI()
+
+# Allow our program to read .env for Shopify connection
+load_dotenv()
 
 # Allows FastAPI to have a session for every user, through saving cookies for every user
 # We need it here to do not ask password at every page.
@@ -106,3 +108,13 @@ app.include_router(clear_products.router)
 # Endpoint for /login
 # -------------------------------------------------------
 app.include_router(auth.router)
+
+# -------------------------------------------------------
+# Endpoint for /shopify/connect
+# -------------------------------------------------------
+app.include_router(auth_shopify.router, prefix="/admin")
+
+# -------------------------------------------------------
+# Endpoint for /auth/shopify/callback
+# -------------------------------------------------------
+app.include_router(shopify_oauth.router)
