@@ -453,3 +453,32 @@ def has_stale_change_price_events(days: int = 7) -> bool:
             cursor.close()
         if conn:
             conn.close()
+
+# ---------------------------------------------------
+# Fx: get all users
+# ---------------------------------------------------
+def get_latest_shopify_connection():
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        sql = """ 
+        SELECT shop_domain, access_token
+        FROM shopify_connections
+        ORDER BY created_at DESC
+        LIMIT 1
+        """
+        cursor.execute(sql)
+        result = cursor.fetchone()
+
+        return result
+    except Error as e:
+        print(f"Error during query get_latest_shopify_connection: {e}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
