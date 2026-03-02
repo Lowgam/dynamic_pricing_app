@@ -1,7 +1,6 @@
 # Module : import_missing_products.py
 # Purpose : create endpoint for admin to import missing products.
 
-import json
 from typing import List, Dict, Optional
 from urllib.parse import urlparse, parse_qs
 from fastapi import APIRouter, Depends
@@ -117,7 +116,7 @@ def admin_import_missing_products():
     #print(f"[Import] imported_count={imported_count} out of fetched={len(shopify_products)}")
 
     # 5) Response
-    return RedirectResponse (url="/admin?imported={imported_count}", status_code=303)
+    return RedirectResponse (url=f"/admin?imported={imported_count}", status_code=303)
 
 
 

@@ -4,58 +4,99 @@
 # Mock at the moment.
 
 from typing import List, Dict
+import requests
+
+SHOPIFY_API_VERSION = "2026-01"
 
 # -----------------------------------------------------
 # Public API (contract)
 # -----------------------------------------------------
 
-def fecth_products() -> List[Dict]:
-    # MOCK MOCK MOCK MOCK MOCK MOCK MOCK
-    # MOCK MOCK MOCK MOCK MOCK MOCK MOCK
-    # MOCK MOCK MOCK MOCK MOCK MOCK MOCK
-    return [
-        {
-            "shopify_id": 101,
-            "sku": "TEST-APPLE-001",
-            "name": "Mela Bio",
-            "price": 0.50,
-            "stock": 42,
-            "expiry_date": "2025-12-20"
-        },
-        {
-            "shopify_id": 102,
-            "sku": "TEST-PASTA-002",
-            "name": "Pasta Integrale",
-            "price": 1.20,
-            "stock": 30,
-            "expiry_date": "2026-01-15"
-        }
-    ]
-
 def fecth_inventory_and_velocity(
+        shop_domain: str,
+        access_token: str,
         shopify_product_ids: List[int],
         window_days = 14
 ) -> Dict[int, Dict[str, float]]:
-    data = {}
+    # -----------------------------------------------------
+    # 1) Guard clause
+    # -----------------------------------------------------
+    if not shopify_product_ids:
+        return {}
 
-    for pid in shopify_product_ids:
+    # -----------------------------------------------------
+    # 2) Prepare request
+    # -----------------------------------------------------
+    headers = {
+        "X-Shopify-Access-Token": access_token
+    }
+
+    ids_string = ",".join(str(pid) for pid in shopify_product_ids)
+
+    url = f"https://{shop_domain}/admin/api/{SHOPIFY_API_VERSION}/products.json"
+
+    params = {
+        "ids": ids_string,
+        "limit": 250
+    }
+
+    # -----------------------------------------------------
+    # 3) Perform API call
+    # -----------------------------------------------------
+
+    response = requests.get(
+        url,
+        headers=headers,
+        params=params,
+        timeout=30
+    )
+
+    if response.status_code >= 400:
+        raise RuntimeError(
+            f"Shopify API error {response.status_code}: {response.text[:300]}"
+        )
+
+    payload = response.json()
+    products = payload.get("products", [])
+
+    # -----------------------------------------------------
+    # 4) Normalize data
+    # -----------------------------------------------------
+
+    data: Dict[int, Dict[str, float]] = {}
+
+    for product in products:
+        pid = product["id"]
+        variants = product.get("variants", [])
+
+        if not variants:
+            continue
+
+        variant = variants[0]
+
         data[pid] = {
-            "stock": _mock_stock(pid),
-            "sales_velocity": _mock_sales_velocity(pid, window_days),
-            "status": _mock_status(pid)
+            # Price is stored inside the variant
+            "price": float(variant.get("price", 0)),
+
+            # inventory_quantity is directly available in the variant
+            "stock": variant.get("inventory_quantity", 0),
+
+            # Velocity will be calculated later in a dedicated service
+            "sales_velocity": 0,
+
+            # Product status (active / archived / draft)
+            "status": product.get("status", "active"),
         }
+
+    # -----------------------------------------------------
+    # 5) Return normalized structure
+    # -----------------------------------------------------
+
     return data
 
-# -----------------------------------------------------
-# MOCK HELPERS
-# -----------------------------------------------------
-def _mock_stock(shopify_product_id: int) -> int:
-    return 20 + (shopify_product_id % 15)
 
-def _mock_sales_velocity(shopify_product_id: int, window_days: int) -> float:
-    base = (shopify_product_id % 7) + 1
-    return round(base / float(window_days), 4)
 
-def _mock_status(shopify_product_id: int) -> str:
-    return "archived" if (shopify_product_id % 2 == 0) else "active"
+
+
+
 

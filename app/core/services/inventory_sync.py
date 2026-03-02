@@ -10,7 +10,7 @@ from app.core.utils import ai_logger
 # ----------------------------------------------------------
 # SYNC FOR STOCK & VELOCITY
 # ----------------------------------------------------------
-def sync_inventory_and_velocity(product_ids: List[int] | None = None) -> int:
+def sync_inventory_and_velocity(shop_domain: str, access_token: str, product_ids: List[int] | None = None) -> int:
 
     conn = None
     cursor = None
@@ -23,10 +23,10 @@ def sync_inventory_and_velocity(product_ids: List[int] | None = None) -> int:
         # 1) Get products from DB (if ids, otherwise all)
         # ----------------------------------------------------------
         if product_ids:
-            sql = "SELECT id, shopify_id FROM products WHERE id IN (%s)" % ",".join(["%s"] * len(product_ids))
+            sql = "SELECT id, shopify_id, price FROM products WHERE id IN (%s)" % ",".join(["%s"] * len(product_ids))
             cursor.execute(sql, product_ids)
         else:
-            sql = "SELECT id, shopify_id FROM products"
+            sql = "SELECT id, shopify_id, price FROM products"
             cursor.execute(sql)
 
         products = cursor.fetchall()
@@ -39,37 +39,92 @@ def sync_inventory_and_velocity(product_ids: List[int] | None = None) -> int:
         # ----------------------------------------------------------
         # 2) Calling extractor
         # ----------------------------------------------------------
-        shopify_data = fecth_inventory_and_velocity(shopify_ids)
+        shopify_data = fecth_inventory_and_velocity(
+            shop_domain,
+            access_token,
+            shopify_ids,
+        )
 
         # ----------------------------------------------------------
-        # 3) Update DB
+        # 3) Price check & Update DB
         # ----------------------------------------------------------
         updated = 0
 
         for p in products:
+            product_id = p["id"]
             sid = p["shopify_id"]
-            data = shopify_data.get(sid)
+            db_price = float(p["price"])
 
+            data = shopify_data.get(sid)
             if not data:
                 continue
 
-            update_sql = """
-            UPDATE products
-            SET stock = %s,
-            sales_velocity_14d = %s,
-            status = %s
-            WHERE id = %s
-            """
+            shopify_price = float(data.get("price", db_price))
 
-            cursor.execute(
-                update_sql,
-                (
-                    data["stock"],
-                    data["sales_velocity"],
-                    data["status"],
-                    p["id"],
-                ),
-            )
+            # ------------------------------------------------------
+            # Price control with open event check
+            # ------------------------------------------------------
+            update_price = False
+
+            if shopify_price != db_price:
+                sql_price_check = """
+                SELECT 1
+                FROM change_price_events
+                WHERE product_id = %s
+                AND status = 'OPEN'
+                LIMIT 1
+                """
+                cursor.execute(sql_price_check, (product_id,))
+                open_event = cursor.fetchone()
+
+                if not open_event:
+                    update_price = True
+                else:
+                    ai_logger.warning(
+                        "[SYNC] Price conflict for product_id=%s (OPEN event exists",
+                        product_id
+                    )
+
+            # ------------------------------------------------------
+            # Update query
+            # ------------------------------------------------------
+            if update_price:
+                update_sql = """
+                            UPDATE products
+                            SET price = %s,
+                            stock = %s,
+                            sales_velocity_14d = %s,
+                            status = %s
+                            WHERE id = %s
+                            """
+
+                cursor.execute(
+                    update_sql,
+                    (
+                        shopify_price,
+                        data["stock"],
+                        data["sales_velocity"],
+                        data["status"],
+                        p["id"],
+                    ),
+                )
+            else:
+                update_sql = """
+                            UPDATE products
+                            SET stock = %s,
+                            sales_velocity_14d = %s,
+                            status = %s
+                            WHERE id = %s
+                            """
+                cursor.execute(
+                    update_sql,
+                    (
+                        data["stock"],
+                        data["sales_velocity"],
+                        data["status"],
+                        product_id,
+                    ),
+                )
             updated += 1
 
         conn.commit()
