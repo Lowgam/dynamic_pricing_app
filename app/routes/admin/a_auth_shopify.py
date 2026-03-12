@@ -1,4 +1,4 @@
-# Module: auth_shopify.py
+# Module: a_auth_shopify.py
 # Purpose: authentication shopify, OAuth routes
 
 import os

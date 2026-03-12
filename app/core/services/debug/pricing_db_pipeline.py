@@ -2,7 +2,7 @@
 # Purpose : calculate simulation of new prices taking datas from DB
 
 from app.database.queries import get_all_products
-from app.core.services.pricing_engine import calculate_engined_price
+from app.flows.flow_ai_pricing.ca_pricing_engine import calculate_engined_price
 
 # ---------------------------------------------------------------------
 # Fx: Calculate a pricing simulation from DB

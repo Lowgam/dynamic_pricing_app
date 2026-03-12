@@ -1,4 +1,4 @@
-# Module : ai_engine.py
+# Module : cc_ai_coeff_engine.py
 # Purpose : The heart of the machine learning structure
 
 # Tasks :

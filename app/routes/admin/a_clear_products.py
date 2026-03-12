@@ -1,4 +1,4 @@
-# Module : clear_products.py
+# Module : a_clear_products.py
 # Purpose : clear products table (local DB only)
 
 from fastapi import APIRouter, Depends

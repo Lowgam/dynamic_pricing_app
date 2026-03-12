@@ -1,10 +1,10 @@
-# Module : train.py
+# Module : a_train.py
 # Purpose : endpoint for admin to start training sessions
 
 from fastapi import APIRouter, Form, Depends
 from fastapi.responses import RedirectResponse
 
-from app.core.services import train_once
+from app.flows.flow_ai_trainer.b_ai_trainer import train_once
 from app.core.utils import ai_logger
 from app.core.utils.auth_guard import require_login
 

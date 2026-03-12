@@ -1,4 +1,4 @@
-# Module : pricing_ai_pipeline.py
+# Module : b_pricing_ai_pipeline.py
 # Purpose : create the final flow for pricing calculation:
 # pricing_engine > feature_builder > ai_engine > pricing_engine
 
@@ -7,9 +7,9 @@ from __future__ import annotations
 
 from typing import List, Dict
 
-from app.core.services.pricing_engine import calculate_engined_price, apply_engined_price
-from app.core.services.feature_builder import build_features
-from app.core.services.ai_engine import calculate_ai_coefficient
+from app.flows.flow_ai_pricing.ca_pricing_engine import calculate_engined_price, apply_engined_price
+from app.flows.flow_ai_pricing.cb_feature_builder import build_features
+from app.flows.flow_ai_pricing.cc_ai_coeff_engine import calculate_ai_coefficient
 from app.core.utils.logger import ai_logger
 
 # ---------------------------------------------------

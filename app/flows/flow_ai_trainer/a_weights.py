@@ -1,4 +1,4 @@
-# Module : weights.py
+# Module : a_weights.py
 # Purpose : admin endpoints for inspecting AI weight snapshots
 
 from fastapi import APIRouter, Request, HTTPException, Depends

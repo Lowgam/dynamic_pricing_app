@@ -1,10 +1,10 @@
-# Module : inventory_sync.py
-# Purpose : Synchronise sales_velocity_14d and stock in DB
+# Module : b_inventory_sync.py
+# Purpose : PIPELINE. Synchronise sales_velocity_14d and stock in DB
 
 from typing import List
 
 from app.database.db import get_connection
-from app.adapters.shopify.shopify_extractor import fecth_inventory_and_velocity
+from app.flows.flow_update_products.c_shopify_extractor import fecth_inventory_and_velocity
 from app.core.utils import ai_logger
 
 # ----------------------------------------------------------

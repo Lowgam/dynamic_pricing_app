@@ -1,12 +1,12 @@
-# Module : pricing.py
-# Purpose : create an endpoint used to simulate calculation of new pricing using pricing_engine.py
+# Module : a_pricing.py
+# Purpose : create an endpoint used to simulate calculation of new pricing using ca_pricing_engine.py
 
 from fastapi import APIRouter, Request
 
 from app.database.queries import get_all_products
 from app.core.services.debug.pricing_db_pipeline import simulate_prices_from_db
 from app.core.services.debug.pricing_pipeline import simulate_new_prices_from_mock
-from app.core.services.pricing_ai_pipeline import simulate_new_prices_with_ai
+from app.flows.flow_ai_pricing.b_pricing_ai_pipeline import simulate_new_prices_with_ai
 
 # Create new route
 router = APIRouter()

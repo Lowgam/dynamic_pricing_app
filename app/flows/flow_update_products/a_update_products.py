@@ -1,10 +1,10 @@
-# Module : sv_sync.py
+# Module : a_update_products.py
 # Purpose : update DB tab product with actual stock and velocity.
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 
-from app.core.services.inventory_sync import sync_inventory_and_velocity
+from app.flows.flow_update_products.b_inventory_sync import sync_inventory_and_velocity
 from app.core.utils import ai_logger
 from app.core.utils.auth_guard import require_login
 from app.database.queries import get_latest_shopify_connection
@@ -13,7 +13,7 @@ router = APIRouter(
     dependencies=[Depends(require_login)]
 )
 
-@router.post("/admin/sync-inventory")
+@router.post("/admin/update-products")
 async def admin_sv_sync():
     # 1) Read shop_domain and token from DB
     conn = get_latest_shopify_connection()

@@ -1,4 +1,4 @@
-# Module : shopify_extractor.py
+# Module : c_shopify_extractor.py
 # Purpose : extract data from Shopify
 
 # Mock at the moment.

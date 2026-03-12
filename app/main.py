@@ -4,7 +4,10 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.routes import dashboard, auth, shopify_oauth
-from app.routes.admin import admin, weights, events_sync, train, sv_sync, reset, import_missing_products, clear_products, auth_shopify
+from app.routes.admin import a_admin, a_events_sync, a_reset, a_clear_products, a_auth_shopify
+from app.flows.flow_ai_trainer import a_weights, a_train
+from app.flows.flow_import_new_products import a_import_missing
+from app.flows.flow_update_products import a_update_products
 from dotenv import load_dotenv
 
 # creation app, FastAPI() = constructor. Everything I am going to add is going to be attached to this object
@@ -67,42 +70,42 @@ app.include_router(dashboard.router)
 # -------------------------------------------------------
 # Endpoint for /admin
 # -------------------------------------------------------
-app.include_router(admin.router)
+app.include_router(a_admin.router)
 
 # -------------------------------------------------------
 # Endpoint for /admin/weights
 # -------------------------------------------------------
-app.include_router(weights.router)
+app.include_router(a_weights.router)
 
 # -------------------------------------------------------
 # Endpoint for /admin/events_sync
 # -------------------------------------------------------
-app.include_router(events_sync.router)
+app.include_router(a_events_sync.router)
 
 # -------------------------------------------------------
 # Endpoint for /admin/train
 # -------------------------------------------------------
-app.include_router(train.router)
+app.include_router(a_train.router)
 
 # -------------------------------------------------------
 # Endpoint for /admin/sv_sync
 # -------------------------------------------------------
-app.include_router(sv_sync.router)
+app.include_router(a_update_products.router)
 
 # -------------------------------------------------------
 # Endpoint for /admin/reset
 # -------------------------------------------------------
-app.include_router(reset.router)
+app.include_router(a_reset.router)
 
 # -------------------------------------------------------
 # Endpoint for /admin/import-missing
 # -------------------------------------------------------
-app.include_router(import_missing_products.router)
+app.include_router(a_import_missing.router)
 
 # -------------------------------------------------------
 # Endpoint for /admin/clear-products
 # -------------------------------------------------------
-app.include_router(clear_products.router)
+app.include_router(a_clear_products.router)
 
 # -------------------------------------------------------
 # Endpoint for /login
@@ -112,7 +115,7 @@ app.include_router(auth.router)
 # -------------------------------------------------------
 # Endpoint for /shopify/connect
 # -------------------------------------------------------
-app.include_router(auth_shopify.router, prefix="/admin")
+app.include_router(a_auth_shopify.router, prefix="/admin")
 
 # -------------------------------------------------------
 # Endpoint for /auth/shopify/callback

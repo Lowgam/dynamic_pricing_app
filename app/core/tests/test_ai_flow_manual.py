@@ -1,8 +1,8 @@
 from app.database.queries import get_all_products
-from app.core.services.pricing_engine import calculate_engined_price
-from app.core.services.feature_builder import build_features  # o nome simile nel tuo file
-from app.core.services.ai_engine import calculate_ai_coefficient  # adattalo al tuo nome reale
-from app.core.services.pricing_engine import apply_engined_price
+from app.flows.flow_ai_pricing.ca_pricing_engine import calculate_engined_price
+from app.flows.flow_ai_pricing.cb_feature_builder import build_features  # o nome simile nel tuo file
+from app.flows.flow_ai_pricing.cc_ai_coeff_engine import calculate_ai_coefficient  # adattalo al tuo nome reale
+from app.flows.flow_ai_pricing.ca_pricing_engine import apply_engined_price
 
 def manual_test_ai_flow():
     # 1) Take all products from DB and select one for testing

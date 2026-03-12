@@ -11,7 +11,7 @@ from starlette.responses import RedirectResponse
 from app.core.services.chart_data_builder import build_chart_data
 from app.core.utils import days_to_expiry
 from app.database.queries import get_products_by_ids, get_all_products, update_product, insert_change_price_event
-from app.core.services.pricing_ai_pipeline import simulate_new_prices_with_ai
+from app.flows.flow_ai_pricing.b_pricing_ai_pipeline import simulate_new_prices_with_ai
 from app.forecasting.forecasting_pipeline import build_sellout_forecast
 from app.core.utils.auth_guard import require_login
 

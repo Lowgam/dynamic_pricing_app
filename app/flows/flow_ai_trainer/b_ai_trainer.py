@@ -1,4 +1,4 @@
-# Module : ai_trainer
+# Module : flow_ai_trainer
 # Purpose : training pipeline. It reads historical data, calculate what happened after changes, updates ai weights,
 #           saves a new version of weights in learning_store.py (enabling rollback)
 from collections import defaultdict
