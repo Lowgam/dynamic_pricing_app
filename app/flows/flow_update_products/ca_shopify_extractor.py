@@ -1,4 +1,4 @@
-# Module : c_shopify_extractor.py
+# Module : ca_shopify_extractor.py
 # Purpose : extract data from Shopify
 
 # Mock at the moment.
@@ -7,7 +7,12 @@ from typing import List, Dict
 import requests
 
 SHOPIFY_API_VERSION = "2026-01"
-
+# -----------------------------------------------------
+# Helper: split list into chunks
+# -----------------------------------------------------
+def chunk_list(lst, size):
+    for i in range (0, len(lst), size):
+        yield lst[i:i + size]
 # -----------------------------------------------------
 # Public API (contract)
 # -----------------------------------------------------
@@ -23,6 +28,7 @@ def fecth_inventory_and_velocity(
     # -----------------------------------------------------
     if not shopify_product_ids:
         return {}
+    print("INPUT IDS:", len(shopify_product_ids))
 
     # -----------------------------------------------------
     # 2) Prepare request
@@ -31,39 +37,38 @@ def fecth_inventory_and_velocity(
         "X-Shopify-Access-Token": access_token
     }
 
-    ids_string = ",".join(str(pid) for pid in shopify_product_ids)
+    data: Dict[int, Dict[str, float]] = {}
+       # -----------------------------------------------------
+       # LOOP OVER CHUNKS (max 250 IDs per request)
+       # -----------------------------------------------------
+    for chunk in chunk_list(shopify_product_ids, 250):
 
-    url = f"https://{shop_domain}/admin/api/{SHOPIFY_API_VERSION}/products.json"
-
-    params = {
-        "ids": ids_string,
-        "limit": 250
-    }
-
+        ids_string = ",".join(str(pid) for pid in chunk)
+        url = f"https://{shop_domain}/admin/api/{SHOPIFY_API_VERSION}/products.json"
+        params = {
+            "ids": ids_string,
+            "limit": 250
+        }
     # -----------------------------------------------------
-    # 3) Perform API call
+    # 3) API call
     # -----------------------------------------------------
-
-    response = requests.get(
-        url,
-        headers=headers,
-        params=params,
-        timeout=30
-    )
-
-    if response.status_code >= 400:
-        raise RuntimeError(
-            f"Shopify API error {response.status_code}: {response.text[:300]}"
+        response = requests.get(
+            url,
+            headers=headers,
+            params=params,
+            timeout=30
         )
 
-    payload = response.json()
-    products = payload.get("products", [])
+        if response.status_code >= 400:
+            raise RuntimeError(
+                f"Shopify API error {response.status_code}: {response.text[:300]}"
+            )
 
+        payload = response.json()
+        products = payload.get("products", [])
     # -----------------------------------------------------
     # 4) Normalize data
     # -----------------------------------------------------
-
-    data: Dict[int, Dict[str, float]] = {}
 
     for product in products:
         pid = product["id"]
@@ -92,6 +97,7 @@ def fecth_inventory_and_velocity(
     # 5) Return normalized structure
     # -----------------------------------------------------
 
+    print("RETURNED IDS:", len(data))
     return data
 
 

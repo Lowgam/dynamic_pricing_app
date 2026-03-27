@@ -482,3 +482,5 @@ def get_latest_shopify_connection():
             cursor.close()
         if conn:
             conn.close()
+
+

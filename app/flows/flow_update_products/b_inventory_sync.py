@@ -4,8 +4,9 @@
 from typing import List
 
 from app.database.db import get_connection
-from app.flows.flow_update_products.c_shopify_extractor import fecth_inventory_and_velocity
+from app.flows.flow_update_products.ca_shopify_extractor import fecth_inventory_and_velocity
 from app.core.utils import ai_logger
+from app.flows.flow_update_products.cb_velocity_service import calculate_sales_velocity
 
 # ----------------------------------------------------------
 # SYNC FOR STOCK & VELOCITY
@@ -37,9 +38,18 @@ def sync_inventory_and_velocity(shop_domain: str, access_token: str, product_ids
         shopify_ids = [p["shopify_id"] for p in products]
 
         # ----------------------------------------------------------
-        # 2) Calling extractor
+        # 2.1) Calling extractor
         # ----------------------------------------------------------
         shopify_data = fecth_inventory_and_velocity(
+            shop_domain,
+            access_token,
+            shopify_ids,
+        )
+
+        # ----------------------------------------------------------
+        # 2.2) Calling velocity_service
+        # ----------------------------------------------------------
+        velocity_map = calculate_sales_velocity(
             shop_domain,
             access_token,
             shopify_ids,
@@ -57,9 +67,17 @@ def sync_inventory_and_velocity(shop_domain: str, access_token: str, product_ids
 
             data = shopify_data.get(sid)
             if not data:
+                print("MISSING FROM SHOPIFY:", sid)
+                update_sql = """
+                        UPDATE products
+                        SET status = 'inactive'
+                        WHERE id = %s
+                    """
+                cursor.execute(update_sql, (product_id,))
                 continue
 
             shopify_price = float(data.get("price", db_price))
+            velocity = velocity_map.get(sid, 0)
 
             # ------------------------------------------------------
             # Price control with open event check
@@ -81,8 +99,10 @@ def sync_inventory_and_velocity(shop_domain: str, access_token: str, product_ids
                     update_price = True
                 else:
                     ai_logger.warning(
-                        "[SYNC] Price conflict for product_id=%s (OPEN event exists",
-                        product_id
+                        "[SYNC] External price change detected during OPEN event | product_id=%s | shopify_price=%s | db_price=%s",
+                        product_id,
+                        shopify_price,
+                        db_price
                     )
 
             # ------------------------------------------------------
@@ -103,8 +123,8 @@ def sync_inventory_and_velocity(shop_domain: str, access_token: str, product_ids
                     (
                         shopify_price,
                         data["stock"],
-                        data["sales_velocity"],
-                        data["status"],
+                        velocity,
+                        "active",
                         p["id"],
                     ),
                 )
@@ -120,8 +140,8 @@ def sync_inventory_and_velocity(shop_domain: str, access_token: str, product_ids
                     update_sql,
                     (
                         data["stock"],
-                        data["sales_velocity"],
-                        data["status"],
+                        velocity,
+                        "active",
                         product_id,
                     ),
                 )

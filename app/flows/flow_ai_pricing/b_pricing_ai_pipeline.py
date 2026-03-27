@@ -20,7 +20,6 @@ def simulate_new_prices_with_ai(products: List[Dict]) -> List[Dict]:
     # In pyt : can be used to give a hint of what kind of variable we want to use
     result : List[Dict] = []
     for p in products:
-
         # 0) Calculate sales velocity FOR LATER
         # sales_last_7_days = p["sales_last_7_days"]
         sales_velocity = None # sales_last_7_days / 7 if sales_last_7_days > 0 else 0.0

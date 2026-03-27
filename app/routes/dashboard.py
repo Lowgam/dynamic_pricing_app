@@ -63,14 +63,20 @@ async def ai_suggestions(request: Request, ids: str= ""):
 
     for p in suggestion:
         dte = days_to_expiry(p.get("expiry_date"))
-
         stock = p.get("stock")
-        velocity_now = p.get("sales_velocity")
+        velocity_now = (p.get("sales_velocity") or p.get("sales_velocity_14d") or p.get("velocity_14d"))
         old_price = float(p.get("base_price"))
         new_price = float(p.get("final_price"))
 
-        print("DEBUG", p.get("id"), "stock=", p.get("stock"), "velocity=", p.get("velocity_14d"),
-              p.get("sales_velocity_14d"), p.get("sales_velocity"))
+        print("DEBUG",
+              "id=", p.get("id"),
+              "stock=", stock,
+              "dte=", dte,
+              "sales_velocity=", p.get("sales_velocity"),
+              "sales_velocity_14d=", p.get("sales_velocity_14d"),
+              "velocity_14d=", p.get("velocity_14d"),
+              "velocity_now_used=", velocity_now
+              )
 
         forecast = build_sellout_forecast(
             stock=stock,
