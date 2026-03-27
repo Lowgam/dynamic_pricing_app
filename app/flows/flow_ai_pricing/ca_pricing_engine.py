@@ -51,16 +51,28 @@ def calculate_engined_price(
         discount = 0.0
 
     else:
-        if days_exp <= 0:
-            discount = 0.5
-        elif days_exp <= 3:
-            discount = 0.4
-        elif days_exp <= 7:
-            discount = 0.3
-        elif days_exp <= 14:
-            discount = 0.2
-        else:
+
+        if days_exp > 30:
+            discount = 0.0
+        elif days_exp > 14:
+            discount = 0.05
+        elif days_exp > 7:
+            discount = 0.08
+        elif days_exp > 0:
             discount = 0.1
+        # -----------------
+        elif days_exp > -7:
+            discount = 0.12
+        elif days_exp > -30:
+            discount = 0.15
+        elif days_exp > -60:
+            discount = 0.17
+        elif days_exp > -90:
+            discount = 0.2
+        elif days_exp > -180:
+            discount = 0.3
+        else:
+            discount = 0.45
 
     # 3) Correction based on stock
     if stock is not None:
@@ -91,8 +103,4 @@ def calculate_engined_price(
 def apply_engined_price(engined_price: float, coeff: float) -> float:
     final_price = engined_price * coeff
     return round(final_price, 2)
-
-# ---------------------------------------------------
-# ------------------- TESTING -----------------------
-# ---------------------------------------------------
 
