@@ -20,6 +20,9 @@ def simulate_new_prices_with_ai(products: List[Dict]) -> List[Dict]:
     # In pyt : can be used to give a hint of what kind of variable we want to use
     result : List[Dict] = []
     for p in products:
+        print("\n--- PRODUCT ---")
+        print("ID:", p.get("id"))
+        print("BASE:", p.get("price"))
         # 0) Calculate sales velocity FOR LATER
         # sales_last_7_days = p["sales_last_7_days"]
         sales_velocity = None # sales_last_7_days / 7 if sales_last_7_days > 0 else 0.0
@@ -32,6 +35,7 @@ def simulate_new_prices_with_ai(products: List[Dict]) -> List[Dict]:
             sales_velocity= p["sales_velocity_14d"],
             expiry_date_str=p["expiry_date"]
         )
+        print("ENGINED:", engined_price)
 
         # 2) Build features for ai
         features = build_features(p, engined_price)
@@ -39,9 +43,12 @@ def simulate_new_prices_with_ai(products: List[Dict]) -> List[Dict]:
         # 3) Calculate ai coefficient
         ai_output = calculate_ai_coefficient(engined_price, features)
         ai_coeff = ai_output["coefficient"]
+        print("AI COEFF:", ai_coeff)
 
         # 4) Calculate the final price with AI coefficient
         final_price = apply_engined_price(engined_price, ai_coeff)
+        print("FINAL PRICE:", final_price)
+        print("--------------")
 
         # 4.1) Log AI suggestions
         ai_logger.info(

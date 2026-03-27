@@ -44,6 +44,7 @@ def fecth_inventory_and_velocity(
     for chunk in chunk_list(shopify_product_ids, 250):
 
         ids_string = ",".join(str(pid) for pid in chunk)
+        print("REQUEST CHUNK SIZE:", len(chunk))
         url = f"https://{shop_domain}/admin/api/{SHOPIFY_API_VERSION}/products.json"
         params = {
             "ids": ids_string,
@@ -66,32 +67,33 @@ def fecth_inventory_and_velocity(
 
         payload = response.json()
         products = payload.get("products", [])
+        print("RESPONSE PRODUCTS:", len(products))
     # -----------------------------------------------------
     # 4) Normalize data
     # -----------------------------------------------------
 
-    for product in products:
-        pid = product["id"]
-        variants = product.get("variants", [])
+        for product in products:
+            pid = product["id"]
+            variants = product.get("variants", [])
 
-        if not variants:
-            continue
+            if not variants:
+                continue
 
-        variant = variants[0]
+            variant = variants[0]
 
-        data[pid] = {
-            # Price is stored inside the variant
-            "price": float(variant.get("price", 0)),
+            data[pid] = {
+                # Price is stored inside the variant
+                "price": float(variant.get("price", 0)),
 
-            # inventory_quantity is directly available in the variant
-            "stock": variant.get("inventory_quantity", 0),
+                # inventory_quantity is directly available in the variant
+                "stock": variant.get("inventory_quantity", 0),
 
-            # Velocity will be calculated later in a dedicated service
-            "sales_velocity": 0,
+                # Velocity will be calculated later in a dedicated service
+                "sales_velocity": 0,
 
-            # Product status (active / archived / draft)
-            "status": product.get("status", "active"),
-        }
+                # Product status (active / archived / draft)
+                "status": product.get("status", "active"),
+            }
 
     # -----------------------------------------------------
     # 5) Return normalized structure

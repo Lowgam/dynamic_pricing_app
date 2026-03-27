@@ -68,12 +68,6 @@ def sync_inventory_and_velocity(shop_domain: str, access_token: str, product_ids
             data = shopify_data.get(sid)
             if not data:
                 print("MISSING FROM SHOPIFY:", sid)
-                update_sql = """
-                        UPDATE products
-                        SET status = 'inactive'
-                        WHERE id = %s
-                    """
-                cursor.execute(update_sql, (product_id,))
                 continue
 
             shopify_price = float(data.get("price", db_price))
