@@ -13,10 +13,10 @@ SHOPIFY_API_VERSION = "2026-01"
 def chunk_list(lst, size):
     for i in range (0, len(lst), size):
         yield lst[i:i + size]
+
 # -----------------------------------------------------
 # Public API (contract)
 # -----------------------------------------------------
-
 def fecth_inventory_and_velocity(
         shop_domain: str,
         access_token: str,
