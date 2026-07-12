@@ -29,7 +29,7 @@ async def simulate_pricing_mock():
     return result
 
 # ---------------------------------------------------------------------
-# Fx: Simulate pricing AI
+# Fx: Simulate pricing AI (OFFICIAL ONE)
 # ---------------------------------------------------------------------
 @router.get("/simulate-prices-ai")
 async def simulate_pricing_ai():

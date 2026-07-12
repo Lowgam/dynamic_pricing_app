@@ -13,10 +13,10 @@ router = APIRouter(
 # ---------------------------------------------------
 # FX: Close OPEN events if days >= 7
 # ---------------------------------------------------
+EVENT_CLOSE_THRESHOLD_DAYS = 7
 @router.post("/admin/sync-events")
-async def admin_sync(days: int = 1):
-    if days < 1:
-        days = 1
+async def admin_sync():
+    days = EVENT_CLOSE_THRESHOLD_DAYS
 
     conn = None
     cursor = None

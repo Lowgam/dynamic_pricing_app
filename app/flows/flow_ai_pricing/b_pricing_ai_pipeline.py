@@ -41,7 +41,7 @@ def simulate_new_prices_with_ai(products: List[Dict]) -> List[Dict]:
         features = build_features(p, engined_price)
 
         # 3) Calculate ai coefficient
-        ai_output = calculate_ai_coefficient(engined_price, features)
+        ai_output = calculate_ai_coefficient(features)
         ai_coeff = ai_output["coefficient"]
         print("AI COEFF:", ai_coeff)
 

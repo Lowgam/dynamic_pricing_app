@@ -3,7 +3,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routes import dashboard, auth, shopify_oauth
+from app.routes import auth, shopify_oauth
+from app.flows.flow_ai_pricing import a_dashboard
 from app.routes.admin import a_admin, a_events_sync, a_reset, a_clear_products, a_auth_shopify
 from app.flows.flow_ai_trainer import a_weights, a_train
 from app.flows.flow_import_new_products import a_import_missing
@@ -65,7 +66,7 @@ def home(Request: Request):
 # -------------------------------------------------------
 # Endpoint for /dashboard
 # -------------------------------------------------------
-app.include_router(dashboard.router)
+app.include_router(a_dashboard.router)
 
 # -------------------------------------------------------
 # Endpoint for /admin

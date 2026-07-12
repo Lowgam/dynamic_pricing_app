@@ -92,7 +92,7 @@ def calculate_engined_price(
     # 6) Calculation discounted price through percentage
     simulated_price = base_price * (1 - discount)
 
-    # 7) Treshplds for final price. Here the max value between simulated_price and cost_price is chosen.
+    # 7) Tresholds for final price. Here the max value between simulated_price and cost_price is chosen.
     engined_price = max(simulated_price, cost_price)
 
     # 8) Rounding to two decimals

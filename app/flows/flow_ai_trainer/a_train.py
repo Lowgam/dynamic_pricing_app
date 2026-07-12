@@ -6,10 +6,10 @@ from fastapi.responses import RedirectResponse
 
 from app.flows.flow_ai_trainer.b_ai_trainer import train_once
 from app.core.utils import ai_logger
-from app.core.utils.auth_guard import require_login
+from app.core.utils.auth_guard import require_login, require_role
 
 router = APIRouter(
-    dependencies=[Depends(require_login)]
+    dependencies=[Depends(require_role("admin"))]
 )
 
 @router.post("/admin/train")

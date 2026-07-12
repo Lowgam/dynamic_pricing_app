@@ -1,4 +1,4 @@
-# Module : dashboard.py
+# Module : a_dashboard.py
 # Purpose : Creation dashboard endpoint
 
 from fastapi import APIRouter, Request, HTTPException, Depends

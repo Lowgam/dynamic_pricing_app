@@ -91,21 +91,21 @@ td {
 
   <div style="padding:10px; border:1px solid #ccc; border-radius:8px; margin:12px 0;">
     {% if train_status == 'ok' %}
-      ✅ <b>Training completed</b>.
+      <b>Training completed</b>.
       Exampled used: <b>{{ request.query_params.get('examples', '0') }}</b>
       {% if request.query_params.get('snapshot') %}
         — Snapshot: <b>#{{ request.query_params.get('snapshot') }}</b>
       {% endif %}
 
     {% elif train_status == 'skipped' and msg == 'no_closed_events' %}
-      ⚠️ <b>Training skipped</b>: there are no CLOSED events with available outcome.
+      <b>Training skipped</b>: there are no CLOSED events with available outcome.
       (Please before trying again close price events. If doen't work again, units_before/after aren't available yet)
 
     {% elif train_status == 'error' %}
-      ❌ <b>Training failed</b>. Check logs.
+      <b>Training failed</b>. Check logs.
 
     {% else %}
-      ℹ️ <b>Training</b>: status = {{ train_status }}{% if msg %}, msg={{ msg }}{% endif %}
+      <b>Training</b>: status = {{ train_status }}{% if msg %}, msg={{ msg }}{% endif %}
     {% endif %}
   </div>
 {% endif %}
@@ -267,7 +267,6 @@ td {
 <!-- 9) Reset ai_current_weights, weights_snapshots, change_price_events -->
 {% if request.session.get("role") == "dev" %}
  <h3>Reset section</h3>
-
 
 <form method="post" action="/admin/reset" onsubmit="return confirm('RESET DB: sei sicuro?');">
   <button type="submit" class="admin-btn" id="reset-btn">RESET Events & Weights</button>

@@ -23,6 +23,7 @@ handler.setFormatter(formatter)
 
 # AI logger
 ai_logger = logging.getLogger("ai_suggestion")
-ai_logger.setLevel(logging.INFO)
+ai_logger.setLevel(logging.DEBUG)
+handler.setLevel(logging.DEBUG)
 ai_logger.addHandler(handler)
 ai_logger.propagate = False

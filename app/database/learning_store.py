@@ -1,10 +1,11 @@
 # Module : learning_store.py
 # Purpose : managing AI weights (read, snapshot, rollback)
 
-from typing import Dict, List, Optional
-from datetime import datetime
+from typing import Dict, List, Optional, Any
+from datetime import datetime, date, timedelta
 
 from app.database.db import get_connection
+from app.core.utils.logger import ai_logger
 
 Weights = Dict[str, float]
 
@@ -175,6 +176,69 @@ def rollback_weights(snapshot_id: int) -> bool:
         if conn:
             conn.rollback()
         return False
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+# --------------------------------------------
+# Load information from change price events
+# --------------------------------------------
+TrainingExample = Dict[str, Any]
+def load_closed_change_price_events(start_date: date, end_date:date) -> List[TrainingExample]:
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        sql = """
+        SELECT
+            product_id,
+            old_price,
+            new_price,
+            units_before,
+            units_after,
+            stock_at_close,
+            days_to_expiry_at_close,
+            velocity_at_close
+        FROM change_price_events
+        WHERE status = 'CLOSED'
+          AND closed_at IS NOT NULL
+          AND DATE(changed_at) >= %s
+          AND DATE(changed_at) <= %s
+        ORDER BY changed_at DESC
+        """
+
+        cursor.execute(sql, (start_date, end_date))
+        rows = cursor.fetchall()
+
+        examples : List[TrainingExample] = []
+        for r in rows:
+            if r["units_before"] is None or r["units_after"] is None:
+                continue
+
+            examples.append({
+                "product_id": int(r["product_id"]),
+                "old_price": float(r["old_price"]),
+                "new_price": float(r["new_price"]),
+                "units_before": int(r["units_before"]),
+                "units_after": int(r["units_after"]),
+                "stock": int(r.get("stock_at_close") or 0),
+                "days_to_expiry": int(r.get("days_to_expiry_at_close") or 0),
+                "velocity": float(r.get("velocity_at_close") or 0.0),
+            })
+
+        ai_logger.info("[AI TRAINER] Loaded %s training examples from CLOSED events", len(examples))
+        return examples
+
+    except Exception as ex:
+        ai_logger.error("[AI TRAINER] Failed to load training examples: %s", ex)
+        return []
+
     finally:
         if cursor:
             cursor.close()

@@ -5,7 +5,7 @@ from collections import defaultdict
 from datetime import date, timedelta
 from typing import Any, Dict, List, Optional
 
-from app.database.db import get_connection
+#from app.database.db import get_connection
 from app.core.utils.logger import ai_logger
 from app.database import learning_store
 # In the future we have to import from learning_store.py and sales_history.py (not existing yet)
@@ -38,7 +38,7 @@ def train_once(
     )
 
     # 1) Historical data
-    example = _load_training_examples(reference_date, lookback_days)
+    example = load_closed_change_price_events(reference_date, lookback_days) #Change here the FX if need to go back to other version
     if not example:
         ai_logger.warning("[AI TRAINER] No training examples found")
         return {
@@ -48,16 +48,16 @@ def train_once(
         }
 
     # 2) Metrics
-    metrics = _compute_metrics(example)
+    metrics = compute_metrics(example)
 
     # 3) Current weights
-    current_weights = _load_current_weights()
+    current_weights = load_current_weights()
 
     # 4) New weights
-    new_weights = _update_weights(current_weights, metrics, learning_rate)
+    new_weights = update_weights(current_weights, metrics, learning_rate)
 
     # 5) Save snapshots
-    snapshot_id = _save_weights_snapshot(
+    snapshot_id = save_weights_snapshot(
         old_weights = current_weights,
         new_weights = new_weights,
         reference_date = reference_date,
@@ -77,11 +77,26 @@ def train_once(
         "old_weights": current_weights,
         "new_weights": new_weights,
     }
-
 # ---------------------------------------------------------
 # 1) Load training data from change_price_evens
 # ---------------------------------------------------------
-def _load_training_examples(reference_date: date, lookback_days: int) -> List[TrainingExample]:
+def load_closed_change_price_events(reference_date: date, lookback_days: int) -> List[TrainingExample]:
+    start_date = reference_date - timedelta(days=lookback_days)
+
+    ai_logger.debug(
+        "[AI TRAINER] Loading training examples | start=%s end=%s lookback=%s",
+        start_date,
+        reference_date,
+        lookback_days
+    )
+
+    return learning_store.load_closed_change_price_events(start_date, reference_date)
+
+
+""""# ---------------------------------------------------------
+# 1) Load training data from change_price_evens
+# ---------------------------------------------------------
+def load_training_examples(reference_date: date, lookback_days: int) -> List[TrainingExample]:
     start = reference_date - timedelta(days=lookback_days)
     ai_logger.debug(
         f"[AI TRAINER] Loading training examples up to %s (start=%s, lookback=%s)",
@@ -95,7 +110,7 @@ def _load_training_examples(reference_date: date, lookback_days: int) -> List[Tr
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        sql = """
+        sql = 
         SELECT
             product_id,
             old_price,
@@ -111,7 +126,7 @@ def _load_training_examples(reference_date: date, lookback_days: int) -> List[Tr
           AND DATE(changed_at) >= %s
           AND DATE(changed_at) <= %s
         ORDER BY changed_at DESC
-        """
+       
 
         cursor.execute(sql, (start, reference_date))
         rows = cursor.fetchall()
@@ -144,11 +159,13 @@ def _load_training_examples(reference_date: date, lookback_days: int) -> List[Tr
             cursor.close()
         if conn:
             conn.close()
+""" # Old FX to be used if necessary.
+
 
 # ---------------------------------------------------------
 # 2) Aggregated metrics
 # ---------------------------------------------------------
-def _compute_metrics(examples: List[TrainingExample]) -> Metrics:
+def compute_metrics(examples: List[TrainingExample]) -> Metrics:
     # It calculates here metrics like medium sell-through
     # Sell through indicates how much has been sold after a certain period
 
@@ -166,7 +183,7 @@ def _compute_metrics(examples: List[TrainingExample]) -> Metrics:
     global_count = 0
 
     # ---------------------------------------
-    # PRODUCT VALUES
+    # PRODUCT VALUES (monitoring and future expansion)
     # ---------------------------------------
 
     # Total sell through for every product analysed in this training-session
@@ -292,7 +309,7 @@ def _compute_metrics(examples: List[TrainingExample]) -> Metrics:
 # ---------------------------------------------------------
 # 3) Loading current weights
 # ---------------------------------------------------------
-def _load_current_weights() -> Weights:
+def load_current_weights() -> Weights:
     # Loading weights from DB
     db_weights = learning_store.load_current_weights()
 
@@ -312,7 +329,7 @@ def _load_current_weights() -> Weights:
 # ---------------------------------------------------------
 # 3) Update weights
 # ---------------------------------------------------------
-def _update_weights(
+def update_weights(
         current_weights: Weights,
         metrics: Metrics,
         learning_rate: float
@@ -367,7 +384,7 @@ def _update_weights(
 # ---------------------------------------------------------
 # 3) Snapshot new weights
 # ---------------------------------------------------------
-def _save_weights_snapshot(
+def save_weights_snapshot(
         old_weights: Weights,
         new_weights: Weights,
         reference_date: date,
